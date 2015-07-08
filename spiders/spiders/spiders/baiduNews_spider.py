@@ -52,10 +52,9 @@ class BaiduNewSpider(Spider):
         requests=[]
         for url in urls:
             requests.append(self.make_requests_from_url(url).replace(callback=self.parse_content))
-        #加入条件，限制爬取数量,测试时为100
-        if len(urls) > 100:
-            for url in sel.xpath(u'//*[@id="page"]/a[text()="下一页>"]/@href').extract():
-                requests.append(self.make_requests_from_url(self.domain_url+url))
+#        #此处添加有问题
+#        for url in sel.xpath(u'//*[@id="page"]/a[text()="下一页>"]/@href').extract():
+#            requests.append(self.make_requests_from_url(self.domain_url+url))
         for item in items:
             yield item
         #return requests
@@ -65,12 +64,6 @@ class BaiduNewSpider(Spider):
     def parse_content(self,response):
         item=BaiduNewsItem()
         item['url']=response.url
-        #p=re.search('''<meta.*?charset=(.*?)"''',response.body)
-        #charset='utf-8'
-        #content=''
-        #if p:
-        #	charset=p.group(1).replace('\'','').replace('\"','')
-        #content=response.body
         if response.body:
             bsoup=BeautifulSoup(response.body,from_encoding='utf-8')
         item['content']=bsoup.get_text()
