@@ -7,8 +7,24 @@
 
 import scrapy
 
-
-class SpidersItem(scrapy.Item):
+class BaiduNewsItem(scrapy.Item):
     # define the fields for your item here like:
     # name = scrapy.Field()
-    pass
+	title = scrapy.Field()
+	createTime = scrapy.Field()
+	abstract = scrapy.Field()
+	source =scrapy.Field()
+	url = scrapy.Field()
+	content = scrapy.Field()
+	#similarity_count=scrapy.Field()
+ 
+class BingNewsItem(scrapy.Item):
+    # define the fields for your item here like:
+    # name = scrapy.Field()
+	title = scrapy.Field()
+	createTime = scrapy.Field()
+	abstract = scrapy.Field()
+	source =scrapy.Field()
+	url = scrapy.Field()
+	content = scrapy.Field()
+	#similarity_count=scrapy.Field()

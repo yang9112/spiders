@@ -15,3 +15,7 @@ NEWSPIDER_MODULE = 'spiders.spiders'
 
 # Crawl responsibly by identifying yourself (and your website) on the user-agent
 #USER_AGENT = 'spiders (+http://www.yourdomain.com)'
+
+ITEM_PIPELINES = {
+    'spiders.pipelines.JsonWriterPipeline': 300,
+}
