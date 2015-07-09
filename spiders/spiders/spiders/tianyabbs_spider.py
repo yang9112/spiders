@@ -5,7 +5,8 @@ from scrapy.xlib.pydispatch import dispatcher
 from scrapy import signals
 from scrapy.selector import Selector
 from scrapy import log
-from spiders.items import TianyaBBSItem 
+from spiders.items import TianyaBBSItem
+from spiders.query import GetQuery
 from bs4 import BeautifulSoup
 import json,re
 import sys
@@ -39,11 +40,13 @@ class TianyaBBSSpider(Spider):
         pageTag = '&s=4'
         #回复时间
         #pageTag = '&s=6'   
-        #默认是相关性        
-        with open("keywords.txt","r") as inputs:
-            for line in inputs:
-                new_url = self.domain_url + '/bbs?q=' + urllib.quote(line) + pageTag
-                self.start_urls.append(new_url)
+        #默认相关性排序       
+        
+        qlist = GetQuery().get_data()
+        for query in qlist:
+            new_url = self.domain_url + '/bbs?q=' + urllib.quote(query.encode('utf8')) + pageTag
+            self.start_urls.append(new_url)
+            
         
     #一个回调函数中返回多个Request以及Item的例子
     def parse(self,response):
