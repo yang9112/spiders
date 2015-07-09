@@ -28,3 +28,14 @@ class BingNewsItem(scrapy.Item):
 	url = scrapy.Field()
 	content = scrapy.Field()
 	#similarity_count=scrapy.Field()
+ 
+class SogouNewsItem(scrapy.Item):
+    # define the fields for your item here like:
+    # name = scrapy.Field()
+	title = scrapy.Field()
+	createTime = scrapy.Field()
+	abstract = scrapy.Field()
+	source =scrapy.Field()
+	url = scrapy.Field()
+	content = scrapy.Field()
+	#similarity_count=scrapy.Field()

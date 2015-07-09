@@ -14,24 +14,19 @@ import urllib
 reload(sys)
 sys.setdefaultencoding('utf-8')
 
-class BaiduNewSpider(Spider):
+class BingNewSpider(Spider):
     name = "bingnew"
     domain_url = "http://cn.bing.com"
-    headers = {
-        'User-Agent':'Mozilla/5.0 (Windows NT 5.2) AppleWebKit/534.30 (KHTML, like Gecko) Chrome/12.0.742.122 Safari/534.30'    
-    }
     start_urls = []
-    
+
     def __init__ (self):
-        super(BaiduNewSpider,self).__init__()
+        super(BingNewSpider,self).__init__()
         #将final绑定到爬虫结束的事件上
         dispatcher.connect(self.initial,signals.engine_started)
         dispatcher.connect(self.finalize,signals.engine_stopped)
     
     def initial(self):
         self.log('---started----')
-        #init the depth
-        self.depth = 0
         self.getStartUrl()
 
     def finalize(self):
@@ -61,11 +56,8 @@ class BaiduNewSpider(Spider):
         for url in urls:
             requests.append(self.make_requests_from_url(url).replace(callback=self.parse_content))
         
-        #测试设置最多2层
-        if(self.depth < 2):
-            self.depth = self.depth + 1
-            for url in sel.xpath(u'//li/a[@class="sb_pagN"]/@href').extract():
-                requests.append(self.make_requests_from_url(self.domain_url+url))
+        for url in sel.xpath(u'//li/a[@class="sb_pagN"]/@href').extract():
+            requests.append(self.make_requests_from_url(self.domain_url+url))
             
         for item in items:
             yield item

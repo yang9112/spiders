@@ -5,7 +5,7 @@ from scrapy.xlib.pydispatch import dispatcher
 from scrapy import signals
 from scrapy.selector import Selector
 from scrapy import log
-from spiders.items import BaiduNewsItem 
+from spiders.items import SogouNewsItem 
 from bs4 import BeautifulSoup
 import json,re
 import sys
@@ -14,13 +14,13 @@ import urllib
 reload(sys)
 sys.setdefaultencoding('utf-8')
 
-class BaiduNewSpider(Spider):
-    name = "baidunew"
-    domain_url = "http://news.baidu.com"
+class SogouNewSpider(Spider):
+    name = "sogounew"
+    domain_url = "http://news.sogou.com"
     start_urls = []
-    
+
     def __init__ (self):
-        super(BaiduNewSpider,self).__init__()
+        super(SogouNewSpider,self).__init__()
         #将final绑定到爬虫结束的事件上
         dispatcher.connect(self.initial,signals.engine_started)
         dispatcher.connect(self.finalize,signals.engine_stopped)
@@ -35,31 +35,33 @@ class BaiduNewSpider(Spider):
 
     def getStartUrl(self):
         #从文件初始化查询关键词
+        #过去24小时以及过去1小时的关键词
+        #timeTag = '&time=0'
         with open("keywords.txt","r") as inputs:
             for line in inputs:
-                self.start_urls.append(self.domain_url+"/ns?rn=20&word="+urllib.quote(line))
-
+                self.start_urls.append(self.domain_url + '/news?query=' + urllib.quote(line))
+        
     #一个回调函数中返回多个Request以及Item的例子
     def parse(self,response):
         #print '====start %s==' %response.url
+        #未成功获取query    
+        if response.url == self.domain_url:
+            print 'error of query'
+            return
         self.log('a response from %s just arrived!' %response.url)
         #抽取并解析新闻网页内容
         items = self.parse_items(response)
         #构造一个Xpath的select对象，用来进行网页元素抽取
         sel = Selector(response)
         #抽取搜索结果页详细页面链接
-        urls = sel.xpath(u'//ul/li/h3[@class="c-title"]/a/@href').extract()
+        urls = sel.xpath(u'//div[@class="rb"]/h3/a/@href').extract()
         requests = []
         for url in urls:
             requests.append(self.make_requests_from_url(url).replace(callback=self.parse_content))
-    
-        #尝试寻找下一页
-        try:
-            url = sel.xpath(u'//p[@id="page"]/a[@class="n"]/@href').extract()[-1]
-            requests.append(self.make_requests_from_url(self.domain_url+url))
-        except:
-            pass
-
+        
+        for url in sel.xpath(u'//a[@class="np"]/@href').extract():
+            requests.append(self.make_requests_from_url(self.domain_url + '/news' + url))
+            
         for item in items:
             yield item
         #return requests
@@ -67,40 +69,37 @@ class BaiduNewSpider(Spider):
             yield request
 
     def parse_content(self,response):
-        item = BaiduNewsItem()
+        item = SogouNewsItem()
         item['url'] = response.url
         if response.body:
-            bsoup = BeautifulSoup(response.body,from_encoding='utf-8')
+            bsoup = BeautifulSoup(response.body)
         item['content'] = bsoup.get_text()
         yield item
 
     def parse_items(self,response):
         if response.body:
-            bsoup = BeautifulSoup(response.body,from_encoding='utf-8')
-        main_content = bsoup.select('div#container')[0].select('div#content_left')[0]
-       
+            bsoup = BeautifulSoup(response.body)
+        main_content = bsoup.select('div#wrapper')[0]
+        
         if main_content:
-            elem_list = main_content.select("ul > li")
+            elem_list = main_content.find_all('div', class_='rb')
         items = []
-        if len(elem_list)>0:
+        if len(elem_list) > 0:
             for elem in elem_list:
-                item = BaiduNewsItem()
+                item = SogouNewsItem()
                 if elem.h3.a.get_text():
                     item['title'] = elem.h3.a.get_text()
                 else:
                     continue
                 item['url'] = elem.h3.a['href']
-                author = elem.find('p',class_='c-author')
-                if author:
-                    source_time = author.get_text().split()
-                    if len(source_time)>1:
-                        m = re.search('(\d{4}-\d{2}-\d{2})',source_time[0])
-                        if m:
-                            item['createTime']=author.get_text()
-                        else:
-                            item['source']=source_time[0]
-                            item['createTime']=' '.join(source_time[1:])
-                if elem.find('div',class_='c-summary'):
-                    item['abstract'] = elem.find('div',class_='c-summary').get_text()
+                author = elem.cite.get_text()
+                if len(author.split()) > 1:
+                    item['source'] = author.split()[0]
+                    item['createTime'] = ' '.join(author.split()[1:])
+                else:
+                    item['source'] = author.split()[0] 
+                    
+                if elem.find('span',class_='sn_snip'):
+                    item['abstract']=elem.find('div',class_='thumb_news').get_text()
                 items.append(item)
             return items
