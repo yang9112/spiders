@@ -1,6 +1,7 @@
 #!/usr/bin/python
 #-*-coding:utf-8-*-
 from scrapy import Spider
+from scrapy import Request
 from scrapy.xlib.pydispatch import dispatcher
 from scrapy import signals
 from scrapy.selector import Selector
@@ -43,48 +44,44 @@ class TianyaBBSSpider(Spider):
         #默认相关性排序       
         
         qlist = GetQuery().get_data()
+#        qlist = ['中国电信']
         for query in qlist:
             new_url = self.domain_url + '/bbs?q=' + urllib.quote(query.encode('utf8')) + pageTag
             self.start_urls.append(new_url)
-            
         
     #一个回调函数中返回多个Request以及Item的例子
     def parse(self,response):
-        print '====start %s==' %response.url
-        #未成功获取query    
-        if response.url == self.domain_url:
-            print 'error of query'
-            pass
-        
+        #print '====start %s==' %response.url
         self.log('a response from %s just arrived!' %response.url)
         #抽取并解析新闻网页内容
         items = self.parse_items(response)
         #构造一个Xpath的select对象，用来进行网页元素抽取
         sel = Selector(response)
         #抽取搜索结果页详细页面链接
-        urls = sel.xpath(u'//ul/li/div/h3/a/@href').extract()
-        
+
         requests = []
-        for url in urls:
-            requests.append(self.make_requests_from_url(url).replace(callback=self.parse_content))
-        
         for url in sel.xpath(u'//div[@class="long-pages"]/a[text()="下一页"]/@href').re('go\(([\d]*?)\)'):
             tp_url = re.sub('&pn=[\d]+?', '', response.url)
             requests.append(self.make_requests_from_url(tp_url + '&pn=' + url))
 
         for item in items:
-            yield item
+            yield Request(url=item['url'], meta={'item': item}, callback=self.parse_content)
+            
         #return requests
         for request in requests:
             yield request
 
     def parse_content(self,response):
-        item = TianyaBBSItem()
-        item['url'] = response.url
+        item = response.meta['item']
         if response.body:
             bsoup = BeautifulSoup(response.body)
-        item['content'] = bsoup.get_text()
-        yield item
+#        from scrapy.shell import inspect_response
+#        inspect_response(response, self)
+        item['content'] = ''
+        item_content_list = bsoup.find_all('div', class_='atl-content')
+        for item_content in item_content_list:
+            item['content'] = item['content'] + re.sub(r'\n|\t|\r', '', item_content.get_text())
+        return item
 
     def parse_items(self,response):
         if response.body:

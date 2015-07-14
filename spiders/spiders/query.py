@@ -32,7 +32,7 @@ class GetQuery():
                 charset = self.charset
                 )                    
         cur = conn.cursor()
-        #cur.execute("create table query(name varchar(50))")
+#        cur.execute("create table query(name varchar(50))")
         #get data from mysql
         info = cur.fetchmany(cur.execute("select * from query"));
         info_list = []

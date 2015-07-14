@@ -1,12 +1,14 @@
 #!/usr/bin/python
 #-*-coding:utf-8-*-
 from scrapy import Spider
+from scrapy import Request
 from scrapy.xlib.pydispatch import dispatcher
 from scrapy import signals
 from scrapy.selector import Selector
 from scrapy import log
 from spiders.items import BingNewsItem 
 from bs4 import BeautifulSoup
+import time
 import json,re
 import sys
 import urllib
@@ -50,28 +52,24 @@ class BingNewSpider(Spider):
         items = self.parse_items(response)
         #构造一个Xpath的select对象，用来进行网页元素抽取
         sel = Selector(response)
-        #抽取搜索结果页详细页面链接
-        urls = sel.xpath(u'//div[@class="newstitle"]/a/@href').extract()
         requests = []
-        for url in urls:
-            requests.append(self.make_requests_from_url(url).replace(callback=self.parse_content))
         
         for url in sel.xpath(u'//li/a[@class="sb_pagN"]/@href').extract():
             requests.append(self.make_requests_from_url(self.domain_url+url))
             
         for item in items:
-            yield item
+            yield Request(url=item['url'], meta={'item': item}, callback=self.parse_content)
+  
         #return requests
         for request in requests:
             yield request
 
     def parse_content(self,response):
-        item = BingNewsItem()
-        item['url'] = response.url
+        item = response.meta['item']
         if response.body:
             bsoup = BeautifulSoup(response.body,from_encoding='utf-8')
         item['content'] = bsoup.get_text()
-        yield item
+        return item
 
     def parse_items(self,response):
         if response.body:
@@ -94,8 +92,32 @@ class BingNewSpider(Spider):
                 if author:
                     #m = re.search('(\d{4}\/\d{1,2}\/\d{1,2})',source_time[0])
                     item['source'] = author.cite.get_text()
-                    item['createTime'] = author.span.get_text()
+                    item['createTime'] = self.normalize_time(str(author.span.get_text()))
                 if elem.find('span',class_='sn_snip'):
                     item['abstract']=elem.find('span',class_='sn_snip').get_text()
                 items.append(item)
             return items
+     
+    def normalize_time(self, time_text):
+        if re.match('\d{4}.*?\d{1,2}.*?\d{1,2}', time_text):
+            time_text = time_text.replace('/', '-') + ' 00:00'
+        else:
+            #非标准时间转换为时间戳,再转为标准时间
+            time_digit = float(filter(str.isdigit, time_text))
+            
+            interval = 0;
+            if time_text.find('天') > 0 or time_text.find('day') > 0:
+                interval = 86400
+            elif time_text.find('时') > 0 or time_text.find('hour') > 0:
+                interval = 3600
+            elif time_text.find('分') > 0 or time_text.find('min') > 0:
+                interval = 60
+            elif time_text.find('秒') > 0 or time_text.find('second') > 0:
+                interval = 1
+            else:
+                return time_text
+            
+            time_true = time.mktime(time.localtime()) - time_digit*interval
+            time_text = time.strftime("%Y-%m-%d %H:%M", time.gmtime(time_true))
+
+        return time_text

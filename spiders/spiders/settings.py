@@ -21,7 +21,7 @@ ITEM_PIPELINES = {
 }
 
 #the max depth of the spider
-DEPTH_LIMIT = 2
+DEPTH_LIMIT = 1
 
 #下载延迟
 DOWNLOAD_DELAY = 0.5#500MS OF DELAY

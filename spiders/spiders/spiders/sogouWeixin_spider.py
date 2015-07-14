@@ -1,12 +1,14 @@
 #!/usr/bin/python
 #-*-coding:utf-8-*-
 from scrapy import Spider
+from scrapy import Request
 from scrapy.xlib.pydispatch import dispatcher
 from scrapy import signals
 from scrapy.selector import Selector
 from scrapy import log
 from spiders.items import SogouNewsItem 
 from bs4 import BeautifulSoup
+import time
 import json,re
 import sys
 import urllib
@@ -43,44 +45,41 @@ class SogouWeixinSpider(Spider):
         
     #一个回调函数中返回多个Request以及Item的例子
     def parse(self,response):
-        #print '====start %s==' %response.url
+        print '====start %s==' %response.url
         #未成功获取query    
         if response.url == self.domain_url:
             print 'error of query'
-            pass
+            return
         
         self.log('a response from %s just arrived!' %response.url)
         #抽取并解析新闻网页内容
         items = self.parse_items(response)
         #构造一个Xpath的select对象，用来进行网页元素抽取
         sel = Selector(response)
-        #抽取搜索结果页详细页面链接
-        urls = sel.xpath(u'//div[@class="txt-box"]/h4/a/@href').extract()
-        
+
         requests = []
-        for url in urls:
-            requests.append(self.make_requests_from_url(url).replace(callback=self.parse_content))
-        
         for url in sel.xpath(u'//a[@class="np"]/@href').extract():
             requests.append(self.make_requests_from_url(self.domain_url + url))
-            
+
         for item in items:
-            yield item
+            yield Request(url=item['url'], meta={'item': item}, callback=self.parse_content)
+            
         #return requests
         for request in requests:
             yield request
 
     def parse_content(self,response):
-        item = SogouNewsItem()
-        item['url'] = response.url
+        item = response.meta['item']
         if response.body:
             bsoup = BeautifulSoup(response.body)
-        item['content'] = bsoup.get_text()
-        yield item
+        item['content'] = bsoup.select('div#page-content')[0].get_text()
+        return item
 
     def parse_items(self,response):
         if response.body:
-            bsoup = BeautifulSoup(response.body)
+            #去除干扰内容<!.*?>
+            res = re.sub(r'<!.*?>', '', response.body)
+            bsoup = BeautifulSoup(res, from_encoding='utf8')
         main_content = bsoup.select('div#wrapper')[0]
         
         if main_content:
@@ -94,14 +93,10 @@ class SogouWeixinSpider(Spider):
                 else:
                     continue
                 item['url'] = elem.h4.a['href']
-                author = elem.div.get_text()
-                if len(author.split()) > 1:
-                    item['source'] = author.split()[0]
-                    item['createTime'] = ' '.join(author.split()[1:])
-                else:
-                    item['source'] = author.div.a['title'] 
+                item['source'] = elem.div.a['title']
+                #时间戳转换时间
+                item['createTime'] = time.strftime('%Y-%m-%d %H:%M', time.localtime(float(elem.div['t'])))
                     
-                if elem.find('span',class_='sn_snip'):
-                    item['abstract']=elem.p.get_text()
+                item['abstract']=elem.p.get_text()
                 items.append(item)
             return items

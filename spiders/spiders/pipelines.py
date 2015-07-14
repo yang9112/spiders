@@ -47,7 +47,7 @@ class TestSpiderPipeline(object):
 class JsonWriterPipeline(object):
     def __init__(self):
         try:
-            self.file1=codecs.open('items.jl','a',encoding='utf-8')
+            #self.file1=codecs.open('items.jl','a',encoding='utf-8')
             self.file2=codecs.open('content.jl','a',encoding='utf-8')
         except IOError,e:
             print 'file open error'
@@ -56,6 +56,6 @@ class JsonWriterPipeline(object):
         line=json.dumps(dict(item),ensure_ascii=False)+"\n"
         if 'content' in item:
             self.file2.write(line)
-        else:
-            self.file1.write(line)
+#        else:
+#            self.file1.write(line)
         return item
