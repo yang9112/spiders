@@ -28,7 +28,7 @@ def decode(s):
 
 class HBaseTest(object):
     
-    def __init__(self, table='test', columnFamilies=['query:','url:','data:'],host='0.0.0.0', port=9090):
+    def __init__(self, table='test', columnFamilies=['indexData:','result'],host='0.0.0.0', port=9090):
         self.table = table
         self.host = host
         self.port = port
@@ -86,9 +86,8 @@ class HBaseTest(object):
         mutations=[]
         columnFamily=self.columnFamilies[1]
         for label in item.keys():
-            if label != 'url':
-                m_name=Mutation(column=columnFamily+label,value=item.get(label))
-                mutations.append(m_name)
+            m_name=Mutation(column=columnFamily+label,value=item.get(label))
+            mutations.append(m_name)
 
         rowKey=item.get('url','not set')
         if rowKey == 'not set':
@@ -153,7 +152,7 @@ class HBaseTest(object):
     
     def getBatchMutations(self,data):
         rowKey=data['url']
-        mutations = [Mutation(column=self.columnFamilies[0]+key,value=data[key]) for key in data.keys()]
+        mutations = [Mutation(column=self.columnFamilies[0]+key,value=data[key].encode('utf8')) for key in data.keys()]
         return BatchMutation(rowKey, mutations)
    
     '''

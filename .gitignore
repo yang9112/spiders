@@ -1,3 +1,4 @@
 *.pyc
 *.jl
 *.log
+*.out

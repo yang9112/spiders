@@ -40,8 +40,7 @@ class GetQuery():
         info_list = []
         #change the data form(tuple) to list
         for name in info:
-            info_list.append(list(name)[1])
-            print list(name)[1]
+            info_list.append(list(name)[0])
 
         cur.close()
         conn.commit()
@@ -49,7 +48,8 @@ class GetQuery():
         return info_list
         
 if __name__ == '__main__':
-    print GetQuery(
+    print GetQuery().get_data()
+"""    print GetQuery(
                 host='10.133.5.48',
                 port = 3306,
                 user='scrm',
@@ -57,3 +57,4 @@ if __name__ == '__main__':
                 db ='scrm',
                 tablename = 'subscribeinfo'
     ).get_data()
+    """

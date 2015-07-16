@@ -31,11 +31,12 @@ class TestSpiderPipeline(object):
         #向hbase写数据
 #        if not item.get('title','not set')=='not set':
 #            print json.dumps(dict(item),ensure_ascii=False)
+        print item
         self.htable.putsResults([item])
         return item
 
     def initialize(self):
-        self.htable=HBaseTest('news')
+        self.htable=HBaseTest('test')
 		
     def finalize(self):
         self.htable.close_trans()
