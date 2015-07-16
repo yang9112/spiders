@@ -17,7 +17,7 @@ NEWSPIDER_MODULE = 'spiders.spiders'
 USER_AGENT = 'Mozilla/5.0 (Windows NT 5.2) AppleWebKit/534.30 (KHTML, like Gecko) Chrome/12.0.742.122 Safari/534.30'
 
 ITEM_PIPELINES = {
-    'spiders.pipelines.JsonWriterPipeline': 300,
+    'spiders.pipelines.TestSpiderPipeline': 300,
 }
 
 #the max depth of the spider

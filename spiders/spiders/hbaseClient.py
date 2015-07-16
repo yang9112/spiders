@@ -3,13 +3,13 @@
 
 import sys
 import json
-sys.path.append('/usr/local/lib/python2.7/site-packages')
+#sys.path.append('/usr/local/lib/python2.7/site-packages')
 
 from hbase.ttypes import IOError, AlreadyExists
 from thrift.transport import TSocket
 from thrift.protocol import TBinaryProtocol
 from thrift.transport import TTransport
-
+from hbase.ttypes import ColumnDescriptor,Mutation,BatchMutation
 
 reload(sys)
 sys.setdefaultencoding('utf-8')
@@ -27,19 +27,20 @@ def decode(s):
     return int(s) if s.isdigit() else struct.unpack('i', s)[0]
 
 class HBaseTest(object):
-    def __init__(self, table='test', columnFamilies=['newsProperty:','data-clean:','nlp-result:'],host='10.210.90.72', port=9090):
+    
+    def __init__(self, table='test', columnFamilies=['query:','url:','data:'],host='0.0.0.0', port=9090):
         self.table = table
         self.host = host
         self.port = port
 
         # Connect to HBase Thrift server
         self.transport = TTransport.TBufferedTransport(TSocket.TSocket(host, port))
-        self.protocol = TBinaryProtocol.TBinaryProtocolAccelerated(self.transport)
-
+        self.protocol = TBinaryProtocol.TBinaryProtocol(self.transport)
+        
         # Create and open the client connection
         self.client = Hbase.Client(self.protocol)
         self.transport.open()
-
+        
         # set type and field of column families
         #self.set_column_families([str, str], ['name', 'sex'])
         self.set_column_families(columnFamilies)
@@ -60,7 +61,7 @@ class HBaseTest(object):
         """
         columnFamilies = []
         for columnFamily in self.columnFamilies:
-            name = Hbase.ColumnDescriptor(name=columnFamily,maxVersions = 1)
+            name = ColumnDescriptor(name=columnFamily,maxVersions = 1)
             columnFamilies.append(name)
         try:
             self.client.createTable(table, columnFamilies)
@@ -83,14 +84,16 @@ class HBaseTest(object):
     def put_Item(self,item):
         #将scrapy产生的Item存入hbase
         mutations=[]
-        columnFamily=self.columnFamilies[0]
+        columnFamily=self.columnFamilies[1]
         for label in item.keys():
-            m_name=Hbase.Mutation(column=columnFamily+label,value=item.get(label))
-            mutations.append(m_name)
+            if label != 'url':
+                m_name=Mutation(column=columnFamily+label,value=item.get(label))
+                mutations.append(m_name)
+
         rowKey=item.get('url','not set')
-        if rowKey=='not set':
+        if rowKey == 'not set':
             return
-        self.client.mutateRow(self.table,rowKey,mutations,{})
+        self.client.mutateRow(self.table, rowKey, mutations, {})
               
     def getRow(self, row):
         """ get one row from hbase table
@@ -150,13 +153,8 @@ class HBaseTest(object):
     
     def getBatchMutations(self,data):
         rowKey=data['url']
-        mutations=[]
-        for key in data.keys():
-            if key!='url':
-                mutations.append(Hbase.Mutation(column=key,value=data[key]))
-            if len(mutations)>0:
-                #self.client.mutateRow(self.table,rowKey,mutations,{})
-                return Hbase.BatchMutation(rowKey,mutations)
+        mutations = [Mutation(column=self.columnFamilies[0]+key,value=data[key]) for key in data.keys()]
+        return BatchMutation(rowKey, mutations)
    
     '''
       *Apply a series of batches in a single transaction*
@@ -165,23 +163,25 @@ class HBaseTest(object):
     def putsResults(self,dataBatch):
         results=[]
         for data in dataBatch:
-            results.append(self.getBatchMutations(data))		 
-        self.client.mutateRows(self.table,results,{})
+            results.append(self.getBatchMutations(data))
+        self.client.mutateRows(self.table, results, {})
 
 def demo():
-    ht = HBaseTest(table='news')
-    item={}
-    item['url']='http://article.pchome.net/content-1773855.html'
-    columns=['newsProperty:title']
-    #for row in ht.getRowByColumns(item['url'],columns):
-    #    print json.dumps(row,ensure_ascii=False)
-    #print ht.getTableReginons()
-    #print ht.getRow(item['url'])
-    #items=[]
-    #items.append({'url':'http://article.pchome.net/content-1773855.html','nlp-result:keys':u'中国移动|4G|产业路线'})
-    #ht.putsResults(items) 
-    for row in ht.scannerWithColumns(needs=4,columns=['newsProperty:title']):
-        print json.dumps(row,ensure_ascii=False)
+    columnFamilies=['indexData:','result']
+    ht = HBaseTest(table='test', columnFamilies=columnFamilies)
+#    item={}
+#    item['url']='http://article.pchome.net/content-1773855.html'
+#    
+#    for row in ht.getRowByColumns(item['url'],columns):
+#        print json.dumps(row,ensure_ascii=False)
+#    print ht.getTableReginons()
+#    print ht.getRow(item['url'])
+    items=[]
+    items.append({'url':'http://article.pchome.net/content-1773855.html','name':'name'.encode('utf8'),'key':'url'.encode('utf8')})
+    items.append({'url':'http://article.pchome.net/content-1773854.html','name':'1773854'.encode('utf8')})
+    ht.putsResults(items)
+#    for row in ht.scannerWithColumns(needs=4,columns=['newsProperty:title']):
+#        print json.dumps(row,ensure_ascii=False)
     ht.close_trans()
 
 if __name__ == '__main__':
