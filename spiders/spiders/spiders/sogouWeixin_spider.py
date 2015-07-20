@@ -6,7 +6,9 @@ from scrapy.xlib.pydispatch import dispatcher
 from scrapy import signals
 from scrapy.selector import Selector
 from scrapy import log
-from spiders.items import SogouNewsItem 
+from spiders.items import SogouNewsItem
+from spiders.tools import Utools
+from spiders.query import GetQuery
 from bs4 import BeautifulSoup
 import time
 import json,re
@@ -20,6 +22,7 @@ class SogouWeixinSpider(Spider):
     name = "sogouwx"
     domain_url = "http://weixin.sogou.com/weixin"
     start_urls = []
+    tool = Utools()
 
     def __init__ (self):
         super(SogouWeixinSpider,self).__init__()
@@ -39,9 +42,10 @@ class SogouWeixinSpider(Spider):
         #从文件初始化查询关键词
         #过去24小时以及过去1小时的关键词
         #timeTag = '&time=0'
-        with open("keywords.txt","r") as inputs:
-            for line in inputs:
-                self.start_urls.append(self.domain_url + '?type=2&query=' + urllib.quote(line))
+        qlist = GetQuery().get_data()
+        for query in qlist:
+            if query:
+                self.start_urls.append(self.domain_url + '?type=2&query=' + urllib.quote(query.encode('utf8')))
         
     #一个回调函数中返回多个Request以及Item的例子
     def parse(self,response):
@@ -88,15 +92,20 @@ class SogouWeixinSpider(Spider):
         if len(elem_list) > 0:
             for elem in elem_list:
                 item = SogouNewsItem()
+                item['type'] = 'weixin'
+                item['source'] = '搜狗微信'
                 if elem.h4.a.get_text():
                     item['title'] = elem.h4.a.get_text()
                 else:
                     continue
                 item['url'] = elem.h4.a['href']
-                item['source'] = elem.div.a['title']
+                item['medianame'] = elem.div.a['title']
                 #时间戳转换时间
-                item['createTime'] = time.strftime('%Y-%m-%d %H:%M', time.localtime(float(elem.div['t'])))
-                    
+                item['pubtime'] = time.strftime('%Y-%m-%d %H:%M', time.localtime(float(elem.div['t'])))
+                if self.tool.old_news(item['pubtime']):
+                        continue
+                
+                item['collecttime'] = time.strftime("%Y-%m-%d %H:%M", time.localtime())
                 item['abstract']=elem.p.get_text()
                 items.append(item)
-            return items
+        return items

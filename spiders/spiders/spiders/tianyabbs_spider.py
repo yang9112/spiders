@@ -7,8 +7,10 @@ from scrapy import signals
 from scrapy.selector import Selector
 from scrapy import log
 from spiders.items import TianyaBBSItem
+from spiders.tools import Utools
 from spiders.query import GetQuery
 from bs4 import BeautifulSoup
+import time
 import json,re
 import sys
 import urllib
@@ -20,6 +22,7 @@ class TianyaBBSSpider(Spider):
     name = "tianyabbs"
     domain_url = "http://search.tianya.cn/"
     start_urls = []
+    tool = Utools()
 
     def __init__ (self):
         super(TianyaBBSSpider,self).__init__()
@@ -43,15 +46,16 @@ class TianyaBBSSpider(Spider):
         #pageTag = '&s=6'   
         #默认相关性排序       
         
-        qlist = GetQuery().get_data()
 #        qlist = ['中国电信']
+        qlist = GetQuery().get_data()
         for query in qlist:
-            new_url = self.domain_url + '/bbs?q=' + urllib.quote(query.encode('utf8')) + pageTag
-            self.start_urls.append(new_url)
+            if query:
+                new_url = self.domain_url + '/bbs?q=' + urllib.quote(query.encode('utf8')) + pageTag
+                self.start_urls.append(new_url)
         
     #一个回调函数中返回多个Request以及Item的例子
     def parse(self,response):
-        #print '====start %s==' %response.url
+        print '====start %s==' %response.url
         self.log('a response from %s just arrived!' %response.url)
         #抽取并解析新闻网页内容
         items = self.parse_items(response)
@@ -98,16 +102,24 @@ class TianyaBBSSpider(Spider):
         if len(elem_list) > 0:
             for elem in elem_list:
                 item = TianyaBBSItem()
-                if elem.div.h3.a.get_text():
+                item['type'] = 'forum'
+                item['source'] = '天涯论坛'
+                try:
                     item['title'] = elem.div.h3.a.get_text()
-                else:
+                except:
                     continue
                 item['url'] = elem.div.h3.a['href']
                 author = elem.find('p', class_='source')
                 if author:
-                    item['source'] = author.a.get_text()
-                    item['author'] = author.a.get_text()                    
-                    item['createTime'] = author.span.get_text()
+                    item['medianame'] = author.a.get_text()
+                    #item['author'] = author.a.get_text()                    
+                    item['pubtime'] = author.span.get_text()
+                    if self.tool.old_news(item['pubtime']):
+                        continue
+                else:
+                    print 'element of author no found!\n'
+                    return
+                item['collecttime'] = time.strftime("%Y-%m-%d %H:%M", time.localtime())                
                 item['abstract']=elem.div.p.get_text()
                 items.append(item)
-            return items
+        return items

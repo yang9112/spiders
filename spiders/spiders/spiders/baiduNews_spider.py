@@ -6,9 +6,13 @@ from scrapy.xlib.pydispatch import dispatcher
 from scrapy import signals
 from scrapy.selector import Selector
 from scrapy import log
-from spiders.items import BaiduNewsItem 
+from spiders.items import BaiduNewsItem
+from spiders.tools import Utools
+from spiders.query import GetQuery
 from bs4 import BeautifulSoup
+from redis import Redis
 import json,re
+import redis
 import time
 import sys
 import urllib
@@ -19,6 +23,7 @@ sys.setdefaultencoding('utf-8')
 class BaiduNewSpider(Spider):
     name = "baidunew"
     domain_url = "http://news.baidu.com"
+    tool = Utools()
     start_urls = []
     
     def __init__ (self):
@@ -30,6 +35,7 @@ class BaiduNewSpider(Spider):
     def initial(self):
         self.log('---started----')
         self.getStartUrl()
+        self.r = Redis(host = self.tool.HOST_REDIS, port = 6379, db = 0)
 
     def finalize(self):
         self.log('---stopped---')
@@ -37,13 +43,15 @@ class BaiduNewSpider(Spider):
 
     def getStartUrl(self):
         #从文件初始化查询关键词
-        with open("keywords.txt","r") as inputs:
-            for line in inputs:
-                self.start_urls.append(self.domain_url+"/ns?rn=10&word="+urllib.quote(line))
+        qlist = GetQuery().get_data()
+        for query in qlist:
+            if query:
+                #默认时间排序
+                self.start_urls.append(self.domain_url+"/ns?rn=20&word="+urllib.quote(query.encode('utf8')) + '&ct=0')
 
     #一个回调函数中返回多个Request以及Item的例子
     def parse(self,response):
-        #print '====start %s==' %response.url
+        print '====start %s==' %response.url
         self.log('a response from %s just arrived!' %response.url)
         #抽取并解析新闻网页内容
         items = self.parse_items(response)
@@ -62,6 +70,7 @@ class BaiduNewSpider(Spider):
             yield Request(url=item['url'], meta={'item': item}, callback=self.parse_content)
         #return requests
         for request in requests:
+            continue
             yield request
 
     def parse_content(self,response):
@@ -82,23 +91,40 @@ class BaiduNewSpider(Spider):
         if len(elem_list)>0:
             for elem in elem_list:
                 item = BaiduNewsItem()
-                if elem.h3.a.get_text():
+                item['type'] = 'news'
+                item['source'] = '百度新闻'
+                try:
                     item['title'] = elem.h3.a.get_text()
-                else:
+                except:
                     continue
                 item['url'] = elem.h3.a['href']
+                
                 author = elem.find('p',class_='c-author')
                 if author:
                     source_time = author.get_text().split()
-                    if len(source_time)>1:
-                        item['source'] = source_time[0]
-                        item['createTime'] = self.normalize_time(str(' '.join(source_time[1:])))
-            
+                    if re.match(r'\d{4}.*?\d{1,2}.*?\d{1,2}', source_time[0]):
+                        item['medianame'] = 'None'
+                        item['pubtime'] = self.normalize_time(str(' '.join(source_time)))
+                    else:
+                        item['medianame'] = source_time[0]
+                        item['pubtime'] = self.normalize_time(str(' '.join(source_time[1:])))
+                        
+                    if self.tool.old_news(item['pubtime']):
+                        continue                        
+                else:
+                    print 'no element of author'
+                    continue
+
+                if self.r.sismember('crawled_set', item['url']):  
+                    continue
+                
+                print 'url: ' + item['url'] + 'is added'
+                item['collecttime'] = time.strftime("%Y-%m-%d %H:%M", time.localtime())
                 if elem.find('div',class_='c-summary'):
                     item['abstract'] = elem.find('div',class_='c-summary').get_text()
                 items.append(item)
-            return items
-
+        return items
+                
     def normalize_time(self, time_text):
         if re.match('\d{4}.*?\d{1,2}.*?\d{1,2}.*?\d{1,2}:\d{1,2}', time_text):
             time_text = time_text.replace('年', '-').replace('月', '-').replace('日', '')
@@ -118,7 +144,7 @@ class BaiduNewSpider(Spider):
             else:
                 return time_text
             
-            time_true = time.mktime(time.localtime()) - time_digit*interval
-            time_text = time.strftime("%Y-%m-%d %H:%M", time.gmtime(time_true))
+            time_true = time.time() - time_digit*interval
+            time_text = time.strftime("%Y-%m-%d %H:%M", time.localtime(time_true))
 
         return time_text

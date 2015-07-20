@@ -9,45 +9,48 @@ import scrapy
 
 class BaiduNewsItem(scrapy.Item):
     # define the fields for your item here like:
-    # name = scrapy.Field()
-	title = scrapy.Field()
-	createTime = scrapy.Field()
-	abstract = scrapy.Field()
-	source =scrapy.Field()
-	url = scrapy.Field()
-	content = scrapy.Field()
-	#similarity_count=scrapy.Field()
- 
-class BingNewsItem(scrapy.Item):
-    # define the fields for your item here like:
-    # name = scrapy.Field()
-	title = scrapy.Field()
-	createTime = scrapy.Field()
-	abstract = scrapy.Field()
-	source =scrapy.Field()
-	url = scrapy.Field()
-	content = scrapy.Field()
-	#similarity_count=scrapy.Field()
- 
-class SogouNewsItem(scrapy.Item):
-    # define the fields for your item here like:
-    # name = scrapy.Field()
-	title = scrapy.Field()
-	createTime = scrapy.Field()
-	abstract = scrapy.Field()
-	source =scrapy.Field()
-	url = scrapy.Field()
-	content = scrapy.Field()
-	#similarity_count=scrapy.Field()
- 
-class TianyaBBSItem(scrapy.Item):
-    # define the fields for your item here like:
-    # name = scrapy.Field()
+    type = scrapy.Field()
+    medianame = scrapy.Field()
+    pubtime = scrapy.Field()
+    collecttime = scrapy.Field()
     title = scrapy.Field()
-    createTime = scrapy.Field()
     abstract = scrapy.Field()
-    author = scrapy.Field()    
     source =scrapy.Field()
     url = scrapy.Field()
     content = scrapy.Field()
-    #similarity_count=scrapy.Field()
+ 
+class BingNewsItem(scrapy.Item):
+    # define the fields for your item here like:
+    type = scrapy.Field()
+    medianame = scrapy.Field()
+    pubtime = scrapy.Field()
+    collecttime = scrapy.Field()
+    title = scrapy.Field()
+    abstract = scrapy.Field()
+    source =scrapy.Field()
+    url = scrapy.Field()
+    content = scrapy.Field()
+ 
+class SogouNewsItem(scrapy.Item):
+    # define the fields for your item here like:
+    type = scrapy.Field()
+    medianame = scrapy.Field()
+    pubtime = scrapy.Field()
+    collecttime = scrapy.Field()
+    title = scrapy.Field()
+    abstract = scrapy.Field()
+    source =scrapy.Field()
+    url = scrapy.Field()
+    content = scrapy.Field()
+ 
+class TianyaBBSItem(scrapy.Item):
+    # define the fields for your item here like:
+    type = scrapy.Field()
+    medianame = scrapy.Field()
+    pubtime = scrapy.Field()
+    collecttime = scrapy.Field()
+    title = scrapy.Field()
+    abstract = scrapy.Field()
+    source =scrapy.Field()
+    url = scrapy.Field()
+    content = scrapy.Field()

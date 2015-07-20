@@ -10,6 +10,7 @@ from thrift.transport import TSocket
 from thrift.protocol import TBinaryProtocol
 from thrift.transport import TTransport
 from hbase.ttypes import ColumnDescriptor,Mutation,BatchMutation
+from tools import Utools
 
 reload(sys)
 sys.setdefaultencoding('utf-8')
@@ -27,10 +28,15 @@ def decode(s):
     return int(s) if s.isdigit() else struct.unpack('i', s)[0]
 
 class HBaseTest(object):
-    
-    def __init__(self, table='test', columnFamilies=['indexData:','result'],host='0.0.0.0', port=9090):
+    def __init__(self, table='test', columnFamilies=['indexData:','result'],host = 'localhost', port=9090):
+
+        try:
+            host = Utools().HOST_HBASE
+        except:
+            print 'use the default host(hbase):"localhost"'
+            host = 'localhost'
+
         self.table = table
-        self.host = host
         self.port = port
 
         # Connect to HBase Thrift server
@@ -83,16 +89,14 @@ class HBaseTest(object):
 
     def put_Item(self,item):
         #将scrapy产生的Item存入hbase
-        mutations=[]
-        columnFamily=self.columnFamilies[1]
-        for label in item.keys():
-            m_name=Mutation(column=columnFamily+label,value=item.get(label))
-            mutations.append(m_name)
+        columnFamily=self.columnFamilies[0]
+        
+        mutation = [Mutation(column=columnFamily+label,value=item.get(label).encode('utf8')) for label in item.keys()]
 
         rowKey=item.get('url','not set')
         if rowKey == 'not set':
             return
-        self.client.mutateRow(self.table, rowKey, mutations, {})
+        self.client.mutateRow(self.table, rowKey, mutation, {})
               
     def getRow(self, row):
         """ get one row from hbase table
@@ -166,8 +170,8 @@ class HBaseTest(object):
         self.client.mutateRows(self.table, results, {})
 
 def demo():
-    columnFamilies=['indexData:','result']
-    ht = HBaseTest(table='test', columnFamilies=columnFamilies)
+    columnFamilies=['indexData:','result:']
+    ht = HBaseTest(table='test_new', columnFamilies=columnFamilies)
 #    item={}
 #    item['url']='http://article.pchome.net/content-1773855.html'
 #    
@@ -178,7 +182,8 @@ def demo():
     items=[]
     items.append({'url':'http://article.pchome.net/content-1773855.html','name':'name'.encode('utf8'),'key':'url'.encode('utf8')})
     items.append({'url':'http://article.pchome.net/content-1773854.html','name':'1773854'.encode('utf8')})
-    ht.putsResults(items)
+    #ht.putsResults(items)
+    ht.put_Item(items[1])
 #    for row in ht.scannerWithColumns(needs=4,columns=['newsProperty:title']):
 #        print json.dumps(row,ensure_ascii=False)
     ht.close_trans()

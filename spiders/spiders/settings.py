@@ -14,14 +14,20 @@ SPIDER_MODULES = ['spiders.spiders']
 NEWSPIDER_MODULE = 'spiders.spiders'
 
 # Crawl responsibly by identifying yourself (and your website) on the user-agent
-USER_AGENT = 'Mozilla/5.0 (Windows NT 5.2) AppleWebKit/534.30 (KHTML, like Gecko) Chrome/12.0.742.122 Safari/534.30'
+#USER_AGENT = 'Mozilla/5.0 (Windows NT 5.2) AppleWebKit/534.30 (KHTML, like Gecko) Chrome/12.0.742.122 Safari/534.30'
 
 ITEM_PIPELINES = {
     'spiders.pipelines.TestSpiderPipeline': 300,
+    'spiders.pipelines.UrlsPipeline': 300,
+    'scrapy.contrib.downloadermiddleware.useragent.UserAgentMiddleware' : None,    
+    'spiders.UserAgentMiddleware.RotateUserAgentMiddleware':100
 }
 
 #the max depth of the spider
 DEPTH_LIMIT = 1
+
+##是否收集最大深度数据。
+#DEPTH_STATS = False
 
 #下载延迟
 DOWNLOAD_DELAY = 0.5#500MS OF DELAY

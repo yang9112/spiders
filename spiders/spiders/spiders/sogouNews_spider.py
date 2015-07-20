@@ -6,7 +6,9 @@ from scrapy.xlib.pydispatch import dispatcher
 from scrapy import signals
 from scrapy.selector import Selector
 from scrapy import log
-from spiders.items import SogouNewsItem 
+from spiders.items import SogouNewsItem
+from spiders.tools import Utools
+from spiders.query import GetQuery
 from bs4 import BeautifulSoup
 import time
 import json,re
@@ -20,6 +22,7 @@ class SogouNewSpider(Spider):
     name = "sogounew"
     domain_url = "http://news.sogou.com/news"
     start_urls = []
+    tool = Utools()
 
     def __init__ (self):
         super(SogouNewSpider,self).__init__()
@@ -37,9 +40,10 @@ class SogouNewSpider(Spider):
 
     def getStartUrl(self):
         #从文件初始化查询关键词
-        with open("keywords.txt","r") as inputs:
-            for line in inputs:
-                self.start_urls.append(self.domain_url + '?query=' + urllib.quote(line))
+        qlist = GetQuery().get_data()
+        for query in qlist:
+            if query:
+                self.start_urls.append(self.domain_url + '?query=' + urllib.quote(query.encode('utf8')))
         
     #一个回调函数中返回多个Request以及Item的例子
     def parse(self,response):
@@ -86,6 +90,8 @@ class SogouNewSpider(Spider):
         if len(elem_list) > 0:
             for elem in elem_list:
                 item = SogouNewsItem()
+                item['type'] = 'news'
+                item['source'] = '搜狗新闻'
                 if elem.h3.a.get_text():
                     item['title'] = elem.h3.a.get_text()
                 else:
@@ -93,11 +99,14 @@ class SogouNewSpider(Spider):
                 item['url'] = elem.h3.a['href']
                 author = elem.cite.get_text()
                 if len(author.split()) > 1:
-                    item['source'] = author.split()[0]
-                    item['createTime'] = ' '.join(author.split()[1:])
+                    item['medianame'] = author.split()[0]
+                    item['pubtime'] = ' '.join(author.split()[1:])
+                    if self.tool.old_news(item['pubtime']):
+                        continue
                 else:
-                    item['source'] = author.split()[0] 
-                    
+                    item['source'] = author.split()[0]
+                
+                item['collecttime'] = time.strftime("%Y-%m-%d %H:%M", time.localtime())
                 item['abstract']=elem.find('div',class_='ft').get_text()
                 items.append(item)
-            return items
+        return items

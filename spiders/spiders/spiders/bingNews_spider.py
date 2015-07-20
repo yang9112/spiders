@@ -6,8 +6,11 @@ from scrapy.xlib.pydispatch import dispatcher
 from scrapy import signals
 from scrapy.selector import Selector
 from scrapy import log
-from spiders.items import BingNewsItem 
+from spiders.items import BingNewsItem
+from spiders.tools import Utools
+from spiders.query import GetQuery
 from bs4 import BeautifulSoup
+from redis import Redis
 import time
 import json,re
 import sys
@@ -20,12 +23,14 @@ class BingNewSpider(Spider):
     name = "bingnew"
     domain_url = "http://cn.bing.com"
     start_urls = []
+    tool = Utools()
 
     def __init__ (self):
         super(BingNewSpider,self).__init__()
         #将final绑定到爬虫结束的事件上
         dispatcher.connect(self.initial,signals.engine_started)
         dispatcher.connect(self.finalize,signals.engine_stopped)
+        self.r = Redis(host = self.tool.HOST_REDIS, port = 6379, db = 0)
     
     def initial(self):
         self.log('---started----')
@@ -37,16 +42,15 @@ class BingNewSpider(Spider):
 
     def getStartUrl(self):
         #从文件初始化查询关键词
-        #过去24小时以及过去1小时的关键词
-        #hour24 = 'qft=interval%3d"7"&form=PTFTNR'
-        #hour1 = 'qft=interval%3d"4"&form=PTFTNR'
-        with open("keywords.txt","r") as inputs:
-            for line in inputs:
-                self.start_urls.append(self.domain_url + '/news/search?q=' + urllib.quote(line))
+        sort_by_time = '&qft=sortbydate%3d"1"'
+        qlist = GetQuery().get_data()
+        for query in qlist:
+            if query:
+                self.start_urls.append(self.domain_url + '/news/search?q=' + urllib.quote(query.encode('utf8')) + sort_by_time)
     
     #一个回调函数中返回多个Request以及Item的例子
     def parse(self,response):
-        #print '====start %s==' %response.url
+        print '====start %s==' %response.url
         self.log('a response from %s just arrived!' %response.url)
         #抽取并解析新闻网页内容
         items = self.parse_items(response)
@@ -82,6 +86,8 @@ class BingNewSpider(Spider):
         if len(elem_list) > 0:
             for elem in elem_list:
                 item = BingNewsItem()
+                item['type'] = 'news'
+                item['source'] = '必应资讯'
                 title = elem.find('div', 'newstitle')
                 if title.a.get_text():
                     item['title'] = title.a.get_text()
@@ -91,12 +97,22 @@ class BingNewSpider(Spider):
                 author = elem.find('span',class_='sn_ST')
                 if author:
                     #m = re.search('(\d{4}\/\d{1,2}\/\d{1,2})',source_time[0])
-                    item['source'] = author.cite.get_text()
-                    item['createTime'] = self.normalize_time(str(author.span.get_text()))
+                    item['medianame'] = author.cite.get_text()
+                    item['pubtime'] = self.normalize_time(str(author.span.get_text()))
+                    if self.tool.old_news(item['pubtime']):
+                        continue
+                else:
+                    print 'no element of author'
+                    continue
+                
+                if self.r.sismember('crawled_set', item['url']):  
+                    continue
+                print item['url']
+                item['collecttime'] = time.strftime("%Y-%m-%d %H:%M", time.localtime())
                 if elem.find('span',class_='sn_snip'):
                     item['abstract']=elem.find('span',class_='sn_snip').get_text()
                 items.append(item)
-            return items
+        return items
      
     def normalize_time(self, time_text):
         if re.match('\d{4}.*?\d{1,2}.*?\d{1,2}', time_text):
@@ -117,7 +133,7 @@ class BingNewSpider(Spider):
             else:
                 return time_text
             
-            time_true = time.mktime(time.localtime()) - time_digit*interval
-            time_text = time.strftime("%Y-%m-%d %H:%M", time.gmtime(time_true))
+            time_true = time.time() - time_digit*interval
+            time_text = time.strftime("%Y-%m-%d %H:%M", time.localtime(time_true))
 
         return time_text
