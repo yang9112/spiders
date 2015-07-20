@@ -65,19 +65,25 @@ class GetQuery():
     
     def split_query(self, querylist):
         info_list = []
+#        for query in querylist:
+#            if query:
+#                query = query.replace('(', '').replace(')', '')
+#                #nedd to combine the key words or not?
+#                newquery_list = query.split('+')
+#                if len(newquery_list) > 1:
+#                    for key1 in newquery_list[0].split('|'):
+#                        for key2 in '|'.join(newquery_list[1:]).split('|'):
+#                            if key1 and key2:                           
+#                                info_list.append(key1 + ' ' + key2)
+#                else:
+#                    newquery_list[0].replace(u'\、'.encode('utf8'), '|')
+#                    info_list.extend(newquery_list[0].split('|'))
+        
         for query in querylist:
             if query:
-                query = query.replace('(', '').replace(')', '')
+                query = query.replace('(', '').replace(')', '').replace('+', '|').replace('、'.encode('utf8'), '|')
                 #nedd to combine the key words or not?
-                newquery_list = query.split('+')
-                if len(newquery_list) > 1:
-                    for key1 in newquery_list[0].split('|'):
-                        for key2 in '|'.join(newquery_list[1:]).split('|'):
-                            if key1 and key2:                           
-                                info_list.append(key1 + ' ' + key2)
-                else:
-                    newquery_list[0].replace(u'\、'.encode('utf8'), '|')
-                    info_list.extend(newquery_list[0].split('|'))
+                info_list.extend(query.split('|'))
         
         return info_list
         

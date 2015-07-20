@@ -5,10 +5,10 @@ import time
 
 class Utools():
     HOST_HBASE = 'localhost'
-    HOST_SQL = 'localhost'
+#    HOST_SQL = 'localhost'
     HOST_REDIS = 'localhost'
 #    HOST_HBASE = '10.133.5.49'
-#    HOST_SQL = '10.133.5.48'
+    HOST_SQL = '10.133.5.48'
 #    HOST_REDIS = '10.133.5.48'
     
     def old_news(self, pubtime):
