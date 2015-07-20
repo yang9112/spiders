@@ -79,8 +79,8 @@ class SogouNewSpider(Spider):
         item = response.meta['item']
         if response.body:
             bsoup = BeautifulSoup(response.body, from_encoding='utf8')
-        item['content'] = bsoup.get_text()
-        return item
+            item['content'] = bsoup.get_text()
+            return item
 
     def parse_items(self,response):
         if response.body:

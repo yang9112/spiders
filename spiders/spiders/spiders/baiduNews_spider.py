@@ -76,8 +76,8 @@ class BaiduNewSpider(Spider):
         item = response.meta['item']
         if response.body:
             bsoup = BeautifulSoup(response.body,from_encoding='utf-8')
-        item['content'] = bsoup.get_text()
-        yield item
+            item['content'] = bsoup.get_text()
+            yield item
 
     def parse_items(self,response):
         if response.body:
@@ -104,7 +104,7 @@ class BaiduNewSpider(Spider):
                     if re.match(r'\d{4}.*?\d{1,2}.*?\d{1,2}', source_time[0].encode('utf8')):
                         item['medianame'] = 'None'
                         item['pubtime'] = self.normalize_time(str(' '.join(source_time)))
-                    elif filter(str.isdigit, source_time[0].encode('utf8')):
+                    elif filter(str.isdigit, source_time[0].encode('utf8')) and len(source_time) == 1:
                         item['medianame'] = 'None'
                         item['pubtime'] = self.normalize_time(str(' '.join(source_time)))
                     else:
