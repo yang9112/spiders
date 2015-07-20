@@ -101,7 +101,10 @@ class BaiduNewSpider(Spider):
                 author = elem.find('p',class_='c-author')
                 if author:
                     source_time = author.get_text().split()
-                    if re.match(r'\d{4}.*?\d{1,2}.*?\d{1,2}', source_time[0]):
+                    if re.match(r'\d{4}.*?\d{1,2}.*?\d{1,2}', source_time[0].encode('utf8')):
+                        item['medianame'] = 'None'
+                        item['pubtime'] = self.normalize_time(str(' '.join(source_time)))
+                    elif filter(str.isdigit, source_time[0].encode('utf8')):
                         item['medianame'] = 'None'
                         item['pubtime'] = self.normalize_time(str(' '.join(source_time)))
                     else:

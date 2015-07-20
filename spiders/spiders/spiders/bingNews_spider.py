@@ -108,7 +108,7 @@ class BingNewSpider(Spider):
                 
                 if self.r.sismember('crawled_set', item['url']):  
                     continue
-                print item['url']
+                print 'url: ' + item['url'] + ' is added'
                 item['collecttime'] = time.strftime("%Y-%m-%d %H:%M", time.localtime())
                 if elem.find('span',class_='sn_snip'):
                     item['abstract']=elem.find('span',class_='sn_snip').get_text()
