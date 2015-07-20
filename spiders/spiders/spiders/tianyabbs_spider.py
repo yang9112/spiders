@@ -6,10 +6,11 @@ from scrapy.xlib.pydispatch import dispatcher
 from scrapy import signals
 from scrapy.selector import Selector
 from scrapy import log
-from spiders.items import TianyaBBSItem
+from spiders.items import DataItem
 from spiders.tools import Utools
 from spiders.query import GetQuery
 from bs4 import BeautifulSoup
+from redis import Redis
 import time
 import json,re
 import sys
@@ -29,6 +30,7 @@ class TianyaBBSSpider(Spider):
         #将final绑定到爬虫结束的事件上
         dispatcher.connect(self.initial,signals.engine_started)
         dispatcher.connect(self.finalize,signals.engine_stopped)
+        self.r = Redis(host = self.tool.HOST_REDIS, port = 6379, db = 0)
     
     def initial(self):
         self.log('---started----')
@@ -101,7 +103,7 @@ class TianyaBBSSpider(Spider):
         items = []
         if len(elem_list) > 0:
             for elem in elem_list:
-                item = TianyaBBSItem()
+                item = DataItem()
                 item['type'] = 'forum'
                 item['source'] = '天涯论坛'
                 try:
@@ -119,6 +121,11 @@ class TianyaBBSSpider(Spider):
                 else:
                     print 'element of author no found!\n'
                     return
+
+                if self.r.sismember('crawled_set', item['url']):  
+                    continue
+                print 'url: ' + item['url'] + ' is added'                   
+                    
                 item['collecttime'] = time.strftime("%Y-%m-%d %H:%M", time.localtime())                
                 item['abstract']=elem.div.p.get_text()
                 items.append(item)

@@ -6,13 +6,12 @@ from scrapy.xlib.pydispatch import dispatcher
 from scrapy import signals
 from scrapy.selector import Selector
 from scrapy import log
-from spiders.items import BaiduNewsItem
+from spiders.items import DataItem
 from spiders.tools import Utools
 from spiders.query import GetQuery
 from bs4 import BeautifulSoup
 from redis import Redis
 import json,re
-import redis
 import time
 import sys
 import urllib
@@ -90,7 +89,7 @@ class BaiduNewSpider(Spider):
         items = []
         if len(elem_list)>0:
             for elem in elem_list:
-                item = BaiduNewsItem()
+                item = DataItem()
                 item['type'] = 'news'
                 item['source'] = '百度新闻'
                 try:
@@ -118,7 +117,7 @@ class BaiduNewSpider(Spider):
                 if self.r.sismember('crawled_set', item['url']):  
                     continue
                 
-                print 'url: ' + item['url'] + 'is added'
+                print 'url: ' + item['url'] + ' is added'
                 item['collecttime'] = time.strftime("%Y-%m-%d %H:%M", time.localtime())
                 if elem.find('div',class_='c-summary'):
                     item['abstract'] = elem.find('div',class_='c-summary').get_text()

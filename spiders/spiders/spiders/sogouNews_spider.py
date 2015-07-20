@@ -6,10 +6,11 @@ from scrapy.xlib.pydispatch import dispatcher
 from scrapy import signals
 from scrapy.selector import Selector
 from scrapy import log
-from spiders.items import SogouNewsItem
+from spiders.items import DataItem
 from spiders.tools import Utools
 from spiders.query import GetQuery
 from bs4 import BeautifulSoup
+from redis import Redis
 import time
 import json,re
 import sys
@@ -29,6 +30,7 @@ class SogouNewSpider(Spider):
         #将final绑定到爬虫结束的事件上
         dispatcher.connect(self.initial,signals.engine_started)
         dispatcher.connect(self.finalize,signals.engine_stopped)
+        self.r = Redis(host = self.tool.HOST_REDIS, port = 6379, db = 0)
     
     def initial(self):
         self.log('---started----')
@@ -40,10 +42,11 @@ class SogouNewSpider(Spider):
 
     def getStartUrl(self):
         #从文件初始化查询关键词
+        sort_by_time = '&sort=1'
         qlist = GetQuery().get_data()
         for query in qlist:
             if query:
-                self.start_urls.append(self.domain_url + '?query=' + urllib.quote(query.encode('utf8')))
+                self.start_urls.append(self.domain_url + '?query=' + urllib.quote(query.encode('utf8')) + sort_by_time)
         
     #一个回调函数中返回多个Request以及Item的例子
     def parse(self,response):
@@ -69,6 +72,7 @@ class SogouNewSpider(Spider):
                     
         #return requests
         for request in requests:
+            continue
             yield request
 
     def parse_content(self,response):
@@ -89,7 +93,7 @@ class SogouNewSpider(Spider):
         items = []
         if len(elem_list) > 0:
             for elem in elem_list:
-                item = SogouNewsItem()
+                item = DataItem()
                 item['type'] = 'news'
                 item['source'] = '搜狗新闻'
                 if elem.h3.a.get_text():
@@ -105,6 +109,10 @@ class SogouNewSpider(Spider):
                         continue
                 else:
                     item['source'] = author.split()[0]
+
+                if self.r.sismember('crawled_set', item['url']):  
+                    continue
+                print 'url: ' + item['url'] + ' is added'
                 
                 item['collecttime'] = time.strftime("%Y-%m-%d %H:%M", time.localtime())
                 item['abstract']=elem.find('div',class_='ft').get_text()

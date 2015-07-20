@@ -6,7 +6,7 @@ from scrapy.xlib.pydispatch import dispatcher
 from scrapy import signals
 from scrapy.selector import Selector
 from scrapy import log
-from spiders.items import BingNewsItem
+from spiders.items import DataItem
 from spiders.tools import Utools
 from spiders.query import GetQuery
 from bs4 import BeautifulSoup
@@ -66,6 +66,7 @@ class BingNewSpider(Spider):
   
         #return requests
         for request in requests:
+            continue
             yield request
 
     def parse_content(self,response):
@@ -85,7 +86,7 @@ class BingNewSpider(Spider):
         items = []
         if len(elem_list) > 0:
             for elem in elem_list:
-                item = BingNewsItem()
+                item = DataItem()
                 item['type'] = 'news'
                 item['source'] = '必应资讯'
                 title = elem.find('div', 'newstitle')

@@ -6,7 +6,7 @@ from scrapy.xlib.pydispatch import dispatcher
 from scrapy import signals
 from scrapy.selector import Selector
 from scrapy import log
-from spiders.items import SogouNewsItem
+from spiders.items import DataItem
 from spiders.tools import Utools
 from spiders.query import GetQuery
 from bs4 import BeautifulSoup
@@ -91,7 +91,7 @@ class SogouWeixinSpider(Spider):
         items = []
         if len(elem_list) > 0:
             for elem in elem_list:
-                item = SogouNewsItem()
+                item = DataItem()
                 item['type'] = 'weixin'
                 item['source'] = '搜狗微信'
                 if elem.h4.a.get_text():
