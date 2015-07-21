@@ -83,10 +83,9 @@ class BaiduNewSpider(Spider):
         if response.body:
             bsoup = BeautifulSoup(response.body,from_encoding='utf-8')
         main_content = bsoup.select('div#container')[0].select('div#content_left')[0]
-       
         if main_content:
-            elem_list = main_content.select("ul > li")
-        items = []
+            elem_list = main_content.find_all('div', class_='result')
+        
         if len(elem_list)>0:
             for elem in elem_list:
                 item = DataItem()
@@ -110,7 +109,7 @@ class BaiduNewSpider(Spider):
                     else:
                         item['medianame'] = source_time[0]
                         item['pubtime'] = self.normalize_time(str(' '.join(source_time[1:])))
-                        
+                    print item['pubtime'] + item['url']
                     if self.tool.old_news(item['pubtime']):
                         continue                        
                 else:
@@ -128,20 +127,21 @@ class BaiduNewSpider(Spider):
         return items
                 
     def normalize_time(self, time_text):
+        time_text = time_text.encode('utf8')
         if re.match('\d{4}.*?\d{1,2}.*?\d{1,2}.*?\d{1,2}:\d{1,2}', time_text):
-            time_text = time_text.replace('年', '-').replace('月', '-').replace('日', '')
+            time_text = time_text.replace('年'.encode('utf8'), '-').replace('月'.encode('utf8'), '-').replace('日'.encode('utf8'), '')
         else:
             #非标准时间转换为时间戳,再转为标准时间
             time_digit = float(filter(str.isdigit, time_text))
             
             interval = 0;
-            if time_text.find('天') > 0:
+            if time_text.find('天'.encode('utf8')) > 0:
                 interval = 86400
-            elif time_text.find('时') > 0:
+            elif time_text.find('时'.encode('utf8')) > 0:
                 interval = 3600
-            elif time_text.find('分') > 0:
+            elif time_text.find('分'.encode('utf8')) > 0:
                 interval = 60
-            elif time_text.find('秒') > 0:
+            elif time_text.find('秒'.encode('utf8')) > 0:
                 interval = 1
             else:
                 return time_text

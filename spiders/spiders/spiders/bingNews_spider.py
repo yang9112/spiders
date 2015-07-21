@@ -116,6 +116,7 @@ class BingNewSpider(Spider):
         return items
      
     def normalize_time(self, time_text):
+        time_text = time_text.encode('utf8')
         if re.match('\d{4}.*?\d{1,2}.*?\d{1,2}', time_text):
             time_text = time_text.replace('/', '-') + ' 00:00'
         else:
@@ -123,13 +124,13 @@ class BingNewSpider(Spider):
             time_digit = float(filter(str.isdigit, time_text))
             
             interval = 0;
-            if time_text.find('天') > 0 or time_text.find('day') > 0:
+            if time_text.find('天'.encode('utf8')) > 0 or time_text.find('day') > 0:
                 interval = 86400
-            elif time_text.find('时') > 0 or time_text.find('hour') > 0:
+            elif time_text.find('时'.encode('utf8')) > 0 or time_text.find('hour') > 0:
                 interval = 3600
-            elif time_text.find('分') > 0 or time_text.find('min') > 0:
+            elif time_text.find('分'.encode('utf8')) > 0 or time_text.find('min') > 0:
                 interval = 60
-            elif time_text.find('秒') > 0 or time_text.find('second') > 0:
+            elif time_text.find('秒'.encode('utf8')) > 0 or time_text.find('second') > 0:
                 interval = 1
             else:
                 return time_text
