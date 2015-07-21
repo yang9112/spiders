@@ -20,7 +20,7 @@ class Utools():
         local_time_value = time.mktime(time.localtime())
         
         #只抓取24小时内的数据
-        return (local_time_value - old_time_value) > 3600
+        return (local_time_value - old_time_value) > 86400
         
 
 if __name__ == '__main__':

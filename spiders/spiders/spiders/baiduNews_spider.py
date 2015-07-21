@@ -85,6 +85,7 @@ class BaiduNewSpider(Spider):
         main_content = bsoup.select('div#container')[0].select('div#content_left')[0]
         if main_content:
             elem_list = main_content.find_all('div', class_='result')
+        items = []
         
         if len(elem_list)>0:
             for elem in elem_list:
@@ -109,7 +110,6 @@ class BaiduNewSpider(Spider):
                     else:
                         item['medianame'] = source_time[0]
                         item['pubtime'] = self.normalize_time(str(' '.join(source_time[1:])))
-                    print item['pubtime'] + item['url']
                     if self.tool.old_news(item['pubtime']):
                         continue                        
                 else:
