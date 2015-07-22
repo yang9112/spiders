@@ -50,7 +50,7 @@ class BaiduNewSpider(Spider):
 
     #一个回调函数中返回多个Request以及Item的例子
     def parse(self,response):
-        print '====start %s==' %response.url
+        #print '====start %s==' %response.url
         self.log('a response from %s just arrived!' %response.url)
         #抽取并解析新闻网页内容
         items = self.parse_items(response)
