@@ -8,9 +8,9 @@ from scrapy.selector import Selector
 from scrapy import log
 from spiders.items import DataItem
 from spiders.tools import Utools
-from spiders.query import GetQuery
+#from spiders.query import GetQuery
 from bs4 import BeautifulSoup
-from redis import Redis
+#from redis import Redis
 import json,re
 import time
 import sys
@@ -20,8 +20,8 @@ reload(sys)
 sys.setdefaultencoding('utf-8')
 
 class BaiduNewSpider(Spider):
-    name = "xicibbs"
-    domain_url = "http://baidu.xici.net/cse"
+    name = "tiebabbs"
+    domain_url = "http://tieba.baidu.com"
     tool = Utools()
     start_urls = []
     
@@ -34,7 +34,7 @@ class BaiduNewSpider(Spider):
     def initial(self):
         self.log('---started----')
         self.getStartUrl()
-        self.r = Redis(host = self.tool.HOST_REDIS, port = 6379, db = 0)
+#        self.r = Redis(host = self.tool.HOST_REDIS, port = 6379, db = 0)
 
     def finalize(self):
         self.log('---stopped---')
@@ -42,16 +42,16 @@ class BaiduNewSpider(Spider):
 
     def getStartUrl(self):
         #从文件初始化查询关键词
-        tag = '&s=11800334043319024933&srt=lds&sti=1440&nsid=0'
-        qlist = GetQuery().get_data()
+        #qlist = GetQuery().get_data()
+        qlist = ['好声音', '优衣库']        
         for query in qlist:
             if query:
                 #默认时间排序
-                self.start_urls.append(self.domain_url+"/search?q="+urllib.quote(query.encode('utf8')) + tag)
-            
+                self.start_urls.append(self.domain_url+"/f/search/res?ie=utf-8&rn=20&qw="+urllib.quote(query.encode('utf8')) + '&ct=0')
+
     #一个回调函数中返回多个Request以及Item的例子
     def parse(self,response):
-        print '====start %s==' %response.url
+        #print '====start %s==' %response.url
         self.log('a response from %s just arrived!' %response.url)
         #抽取并解析新闻网页内容
         items = self.parse_items(response)
@@ -68,7 +68,6 @@ class BaiduNewSpider(Spider):
 
         for item in items:
             yield Request(url=item['url'], meta={'item': item}, callback=self.parse_content)
-
         #return requests
         for request in requests:
             continue
@@ -76,57 +75,54 @@ class BaiduNewSpider(Spider):
 
     def parse_content(self,response):
         item = response.meta['item']
-        
-        main_content = response.xpath('//head').extract()[0]
-        content_list = re.findall('({"del_w".*?})', main_content)
-        
-        if len(content_list) > 0:
-            maindict = eval(content_list[0].replace('false', 'False').replace('true', 'True'))
-            item['medianame'] = maindict['UserName']
-            item['pubtime'] = maindict['really_updated_at'][:-3]
-            if self.tool.old_news(item['pubtime']):
-                return
+        if response.body:
+            bsoup = BeautifulSoup(response.body,from_encoding='utf-8')
+            try:
+                item['title'] = bsoup.find('h1', class_='core_title_txt')['title']
+            except:
+                item['title'] = bsoup.find('h3', class_='core_title_txt')['title']
+             
             item['content'] = []
-            for content in content_list:
-                content_dict = eval(content.replace('false', 'False').replace('true', 'True'))
-                if content.has_key('floorcontent'):
-                    item['content'].append(content_dict['floorcontent'].encode('utf8'))
+            for elem in bsoup.find_all('div', class_='d_post_content'):
+                item['content'].append(elem.get_text())
+            
             if item:
-                item['content'] = ' '.join(item['content'])            
+                item['content'] = ' '.join(item['content']).encode('utf8')
                 print 'url: ' + item['url'] + ' is added'
-                return item                  
-        else:
-            return
-        
-        
+                yield item
 
     def parse_items(self,response):
         if response.body:
             bsoup = BeautifulSoup(response.body,from_encoding='utf-8')
-        main_content = bsoup.select('div#results')[0]
+        main_content = bsoup.find('div', class_='s_post_list')
+       
         if main_content:
-            elem_list = main_content.find_all('div', class_='result')
+            elem_list = main_content.find_all('div', class_='s_post')
         items = []
         
         if len(elem_list)>0:
             for elem in elem_list:
                 item = DataItem()
                 item['type'] = 'forum'
-                item['source'] = '西祠胡同'
+                item['source'] = '百度贴吧'
                 try:
-                    item['title'] = elem.h3.a.get_text()
+                    item['pubtime'] = elem.find('font', class_='p_date').get_text()
+                    if self.tool.old_news(item['pubtime']):
+                        continue
+                    
+                    #item['title'] = elem.span.a.get_text()
+                    item['medianame'] = elem.find('font', class_='p_violet').get_text()
+                    item['abstract'] = elem.find('div',class_='p_content').get_text()           
                 except:
                     continue
-                item['url'] = elem.h3.a['href']
-
-                if self.r.sismember('crawled_set', item['url']):  
-                    continue
+                
+                
+                item['url'] = self.domain_url + re.findall('(/p/.*?)[^\d]', elem.span.a['href'])[0]
+#                if self.r.sismember('crawled_set', item['url']):  
+#                    continue
                 
                 item['collecttime'] = time.strftime("%Y-%m-%d %H:%M", time.localtime())
-                if elem.find('div',class_='c-summary'):
-                    item['abstract'] = elem.find('div',class_='c-content').get_text()
                 items.append(item)
-        
         #去重
         new_items = []
         url_list = []
