@@ -43,7 +43,8 @@ class BingNewSpider(Spider):
     def getStartUrl(self):
         #从文件初始化查询关键词
         sort_by_time = '&qft=sortbydate%3d"1"'
-        qlist = GetQuery().get_data()
+        qlist = ['好声音']
+        #qlist = GetQuery().get_data()
         for query in qlist:
             if query:
                 self.start_urls.append(self.domain_url + '/news/search?q=' + urllib.quote(query.encode('utf8')) + sort_by_time)
@@ -90,7 +91,7 @@ class BingNewSpider(Spider):
                 item['type'] = 'news'
                 item['source'] = '必应资讯'
                 title = elem.find('div', 'newstitle')
-                if title.a.get_text():
+                if title and title.a.get_text():
                     item['title'] = title.a.get_text()
                 else:
                     continue
