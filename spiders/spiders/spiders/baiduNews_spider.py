@@ -77,6 +77,7 @@ class BaiduNewSpider(Spider):
         if response.body:
             bsoup = BeautifulSoup(response.body,from_encoding='utf-8')
             item['content'] = bsoup.get_text()
+            print 'url: ' + item['url'] + ' is added'
             yield item
 
     def parse_items(self,response):
@@ -119,7 +120,6 @@ class BaiduNewSpider(Spider):
                 if self.r.sismember('crawled_set', item['url']):  
                     continue
                 
-                print 'url: ' + item['url'] + ' is added'
                 item['collecttime'] = time.strftime("%Y-%m-%d %H:%M", time.localtime())
                 if elem.find('div',class_='c-summary'):
                     item['abstract'] = elem.find('div',class_='c-summary').get_text()
