@@ -89,10 +89,12 @@ class BaiduNewSpider(Spider):
             item['content'] = []
             for content in content_list:
                 content_dict = eval(content.replace('false', 'False').replace('true', 'True'))
-                item['content'].append(content_dict['floorcontent'].encode('utf8'))
-            item['content'] = str(item['content'])
-            print 'url: ' + item['url'] + ' is added'
-            return item                  
+                if content.has_key('floorcontent'):
+                    item['content'].append(content_dict['floorcontent'].encode('utf8'))
+            if item:
+                item['content'] = str(item['content'])            
+                print 'url: ' + item['url'] + ' is added'
+                return item                  
         else:
             return
         
