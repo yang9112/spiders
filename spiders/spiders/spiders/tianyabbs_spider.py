@@ -93,7 +93,9 @@ class TianyaBBSSpider(Spider):
 #        inspect_response(response, self)
         
         item_content_list = bsoup.find_all('div', class_='atl-content')
-        item['content'] = re.sub(r'\n|\t|\r', '', ' '.join(item_content_list).encode('utf8'))
+        
+        item['content'] = ' '.join(str(v).encode('utf8') for v in item_content_list)
+        item['content'] = re.sub(r'\n|\t|\r', '', item['content'])
         if item['content']:        
             return item
 
