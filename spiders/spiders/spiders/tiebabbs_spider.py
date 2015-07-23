@@ -8,9 +8,9 @@ from scrapy.selector import Selector
 from scrapy import log
 from spiders.items import DataItem
 from spiders.tools import Utools
-#from spiders.query import GetQuery
+from spiders.query import GetQuery
 from bs4 import BeautifulSoup
-#from redis import Redis
+from redis import Redis
 import json,re
 import time
 import sys
@@ -34,7 +34,7 @@ class BaiduNewSpider(Spider):
     def initial(self):
         self.log('---started----')
         self.getStartUrl()
-#        self.r = Redis(host = self.tool.HOST_REDIS, port = 6379, db = 0)
+        self.r = Redis(host = self.tool.HOST_REDIS, port = 6379, db = 0)
 
     def finalize(self):
         self.log('---stopped---')
@@ -77,11 +77,13 @@ class BaiduNewSpider(Spider):
         item = response.meta['item']
         if response.body:
             bsoup = BeautifulSoup(response.body,from_encoding='utf-8')
-            try:
+            if bsoup.find('h1', class_='core_title_txt'):
                 item['title'] = bsoup.find('h1', class_='core_title_txt')['title']
-            except:
+            elif bsoup.find('h3', class_='core_title_txt'):
                 item['title'] = bsoup.find('h3', class_='core_title_txt')['title']
-             
+            else:
+                return
+            
             item['content'] = []
             for elem in bsoup.find_all('div', class_='d_post_content'):
                 item['content'].append(elem.get_text())
@@ -116,10 +118,9 @@ class BaiduNewSpider(Spider):
                 except:
                     continue
                 
-                
                 item['url'] = self.domain_url + re.findall('(/p/.*?)[^\d]', elem.span.a['href'])[0]
-#                if self.r.sismember('crawled_set', item['url']):  
-#                    continue
+                if self.r.sismember('crawled_set', item['url']):  
+                    continue
                 
                 item['collecttime'] = time.strftime("%Y-%m-%d %H:%M", time.localtime())
                 items.append(item)
