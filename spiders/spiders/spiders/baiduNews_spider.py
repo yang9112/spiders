@@ -74,6 +74,12 @@ class BaiduNewSpider(Spider):
 
     def parse_content(self,response):
         item = response.meta['item']
+
+        if item['url'].find('?') >= 0:
+            item['url'] = response.url
+            if self.r.sismember('crawled_set', item['url']):  
+                return         
+        
         if response.body:
             bsoup = BeautifulSoup(response.body,from_encoding='utf-8')
             item['content'] = bsoup.get_text()
@@ -98,6 +104,9 @@ class BaiduNewSpider(Spider):
                 except:
                     continue
                 item['url'] = elem.h3.a['href']
+
+                if item['url'].find('htm?') >= 0 or item['url'].find('html?') >= 0:
+                    item['url'] = ''.join(item['url'].split('?')[0:-1])
                 
                 author = elem.find('p',class_='c-author')
                 if author:

@@ -16,7 +16,7 @@ class Utools():
             old_time_value = time.mktime(time.strptime(pubtime, "%Y-%m-%d %H:%M"))
         except:
             print pubtime + ' time format illegal!\n'
-            return False
+            return True
         local_time_value = time.mktime(time.localtime())
         
         #只抓取24小时内的数据

@@ -50,7 +50,7 @@ class SogouNewSpider(Spider):
         
     #一个回调函数中返回多个Request以及Item的例子
     def parse(self,response):
-        print '====start %s==' %response.url
+        #print '====start %s==' %response.url
         #未成功获取query    
         if response.url == self.domain_url:
             print 'error of query'
@@ -77,6 +77,13 @@ class SogouNewSpider(Spider):
 
     def parse_content(self,response):
         item = response.meta['item']
+        
+        if item['url'].find('?') >= 0:
+            item['url'] = response.url
+            if self.r.sismember('crawled_set', item['url']):  
+                return        
+        
+        print 'url: ' + item['url'] + ' is added'
         if response.body:
             bsoup = BeautifulSoup(response.body, from_encoding='utf8')
             item['content'] = bsoup.get_text()
@@ -101,6 +108,10 @@ class SogouNewSpider(Spider):
                 else:
                     continue
                 item['url'] = elem.h3.a['href']
+
+                if item['url'].find('htm?') >= 0 or item['url'].find('html?') >= 0:
+                    item['url'] = ''.join(item['url'].split('?')[0:-1])                
+                
                 author = elem.cite.get_text()
                 if len(author.split()) > 1:
                     item['medianame'] = author.split()[0]
@@ -112,7 +123,6 @@ class SogouNewSpider(Spider):
 
                 if self.r.sismember('crawled_set', item['url']):  
                     continue
-                print 'url: ' + item['url'] + ' is added'
                 
                 item['collecttime'] = time.strftime("%Y-%m-%d %H:%M", time.localtime())
                 item['abstract']=elem.find('div',class_='ft').get_text()

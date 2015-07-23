@@ -57,7 +57,7 @@ class TianyaBBSSpider(Spider):
         
     #一个回调函数中返回多个Request以及Item的例子
     def parse(self,response):
-        print '====start %s==' %response.url
+        #print '====start %s==' %response.url
         self.log('a response from %s just arrived!' %response.url)
         #抽取并解析新闻网页内容
         items = self.parse_items(response)
@@ -75,19 +75,27 @@ class TianyaBBSSpider(Spider):
             
         #return requests
         for request in requests:
+            continue
             yield request
 
     def parse_content(self,response):
         item = response.meta['item']
+        
+        if item['url'].find('?') >= 0:
+            item['url'] = response.url
+            if self.r.sismember('crawled_set', item['url']):
+                return        
+        
+        print 'url: ' + item['url'] + ' is added' 
         if response.body:
             bsoup = BeautifulSoup(response.body)
 #        from scrapy.shell import inspect_response
 #        inspect_response(response, self)
-        item['content'] = ''
+        
         item_content_list = bsoup.find_all('div', class_='atl-content')
-        for item_content in item_content_list:
-            item['content'] = item['content'] + re.sub(r'\n|\t|\r', '', item_content.get_text())
-        return item
+        item['content'] = re.sub(r'\n|\t|\r', '', ' '.join(item_content_list).encode('utf8'))
+        if item['content']:        
+            return item
 
     def parse_items(self,response):
         if response.body:
@@ -111,11 +119,18 @@ class TianyaBBSSpider(Spider):
                 except:
                     continue
                 item['url'] = elem.div.h3.a['href']
+
+                if item['url'].find('htm?') >= 0 or item['url'].find('html?') >= 0:
+                    item['url'] = ''.join(item['url'].split('?')[0:-1])                
+                
                 author = elem.find('p', class_='source')
                 if author:
                     item['medianame'] = author.a.get_text()
                     #item['author'] = author.a.get_text()                    
-                    item['pubtime'] = author.span.get_text()
+                    if author.span.get_text().find('-') > 0:
+                        item['pubtime'] = author.span.get_text()
+                    else:
+                        item['pubtime'] = author.find_all('span')[-2].get_text()
                     if self.tool.old_news(item['pubtime']):
                         continue
                 else:
@@ -124,8 +139,7 @@ class TianyaBBSSpider(Spider):
 
                 if self.r.sismember('crawled_set', item['url']):  
                     continue
-                print 'url: ' + item['url'] + ' is added'                   
-                    
+                
                 item['collecttime'] = time.strftime("%Y-%m-%d %H:%M", time.localtime())                
                 item['abstract']=elem.div.p.get_text()
                 items.append(item)

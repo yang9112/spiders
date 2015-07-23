@@ -50,7 +50,7 @@ class BingNewSpider(Spider):
     
     #一个回调函数中返回多个Request以及Item的例子
     def parse(self,response):
-        print '====start %s==' %response.url
+        #print '====start %s==' %response.url
         self.log('a response from %s just arrived!' %response.url)
         #抽取并解析新闻网页内容
         items = self.parse_items(response)
@@ -71,6 +71,13 @@ class BingNewSpider(Spider):
 
     def parse_content(self,response):
         item = response.meta['item']
+
+        if item['url'].find('?') >= 0:
+            item['url'] = response.url
+            if self.r.sismember('crawled_set', item['url']):  
+                return        
+        
+        print 'url: ' + item['url'] + ' is added'
         if response.body:
             bsoup = BeautifulSoup(response.body,from_encoding='utf-8')
             item['content'] = bsoup.get_text()
@@ -95,6 +102,10 @@ class BingNewSpider(Spider):
                 else:
                     continue
                 item['url'] = title.a['href']
+
+                if item['url'].find('htm?') >= 0 or item['url'].find('html?') >= 0:
+                    item['url'] = ''.join(item['url'].split('?')[0:-1])
+                
                 author = elem.find('span',class_='sn_ST')
                 if author:
                     #m = re.search('(\d{4}\/\d{1,2}\/\d{1,2})',source_time[0])
@@ -108,7 +119,7 @@ class BingNewSpider(Spider):
                 
                 if self.r.sismember('crawled_set', item['url']):  
                     continue
-                print 'url: ' + item['url'] + ' is added'
+                
                 item['collecttime'] = time.strftime("%Y-%m-%d %H:%M", time.localtime())
                 if elem.find('span',class_='sn_snip'):
                     item['abstract']=elem.find('span',class_='sn_snip').get_text()

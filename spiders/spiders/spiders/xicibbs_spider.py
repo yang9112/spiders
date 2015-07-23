@@ -51,7 +51,7 @@ class BaiduNewSpider(Spider):
             
     #一个回调函数中返回多个Request以及Item的例子
     def parse(self,response):
-        print '====start %s==' %response.url
+        #print '====start %s==' %response.url
         self.log('a response from %s just arrived!' %response.url)
         #抽取并解析新闻网页内容
         items = self.parse_items(response)
@@ -76,7 +76,12 @@ class BaiduNewSpider(Spider):
 
     def parse_content(self,response):
         item = response.meta['item']
-        
+
+        if item['url'].find('?') >= 0:
+            item['url'] = response.url
+            if self.r.sismember('crawled_set', item['url']):  
+                return
+    
         main_content = response.xpath('//head').extract()[0]
         content_list = re.findall('({"del_w".*?})', main_content)
         
@@ -86,13 +91,13 @@ class BaiduNewSpider(Spider):
             item['pubtime'] = maindict['really_updated_at'][:-3]
             if self.tool.old_news(item['pubtime']):
                 return
-            item['content'] = []
+            item['content'] = []    
             for content in content_list:
-                content_dict = eval(content.replace('false', 'False').replace('true', 'True'))
-                if content.has_key('floorcontent'):
-                    item['content'].append(content_dict['floorcontent'].encode('utf8'))
+                content_dict = eval(content.replace('false', 'False').replace('true', 'True').encode('utf8'))
+                if content_dict.has_key('floorcontent'):
+                    item['content'].append(content_dict['floorcontent'])
             if item:
-                item['content'] = ' '.join(item['content'])            
+                item['content'] = re.sub('<.*?>', '', ' '.join(item['content']))       
                 print 'url: ' + item['url'] + ' is added'
                 return item                  
         else:
@@ -117,7 +122,10 @@ class BaiduNewSpider(Spider):
                     item['title'] = elem.h3.a.get_text()
                 except:
                     continue
-                item['url'] = elem.h3.a['href']
+                item['url'] = elem.h3.a['href'].replace('user', 'www')
+                
+                if item['url'].find('htm?') >= 0 or item['url'].find('html?') >= 0:
+                    item['url'] = ''.join(item['url'].split('?')[0:-1])
 
                 if self.r.sismember('crawled_set', item['url']):  
                     continue

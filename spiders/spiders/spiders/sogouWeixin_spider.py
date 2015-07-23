@@ -49,7 +49,7 @@ class SogouWeixinSpider(Spider):
         
     #一个回调函数中返回多个Request以及Item的例子
     def parse(self,response):
-        print '====start %s==' %response.url
+        #print '====start %s==' %response.url
         #未成功获取query    
         if response.url == self.domain_url:
             print 'error of query'
