@@ -92,9 +92,9 @@ class TianyaBBSSpider(Spider):
 #        from scrapy.shell import inspect_response
 #        inspect_response(response, self)
         
-        item_content_list = bsoup.find_all('div', class_='atl-content')
+        item_content_list = bsoup.find_all('div', class_='bbs-content')
         
-        item['content'] = ' '.join(str(v).encode('utf8') for v in item_content_list)
+        item['content'] = ' '.join(v.get_text().encode('utf8') for v in item_content_list)
         item['content'] = re.sub(r'\n|\t|\r', '', item['content'])
         if item['content']:        
             return item

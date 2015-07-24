@@ -86,20 +86,26 @@ class BaiduNewSpider(Spider):
         content_list = re.findall('({"del_w".*?})', main_content)
         
         if len(content_list) > 0:
-            maindict = eval(content_list[0].replace('false', 'False').replace('true', 'True'))
-            item['medianame'] = maindict['UserName']
-            item['pubtime'] = maindict['really_updated_at'][:-3]
-            if self.tool.old_news(item['pubtime']):
-                return
-            item['content'] = []    
-            for content in content_list:
-                content_dict = eval(content.replace('false', 'False').replace('true', 'True').encode('utf8'))
-                if content_dict.has_key('floorcontent'):
-                    item['content'].append(content_dict['floorcontent'])
-            if item:
-                item['content'] = re.sub('<.*?>', '', ' '.join(item['content']))       
-                print 'url: ' + item['url'] + ' is added'
-                return item                  
+            try:
+                content_list[0] = re.sub('<.*?>', '', content_list[0]).replace('{','').replace('}', '')
+                maindict = json.loads('{' + content_list[0] + '}', encoding='utf8')
+                item['medianame'] = maindict['UserName']
+                item['pubtime'] = maindict['really_updated_at'][:-3]
+                if self.tool.old_news(item['pubtime']):
+                    return
+                item['content'] = []    
+                for content in content_list:
+                    content = re.sub('<.*?>', '', content).replace('{','').replace('}', '')
+                    content_dict = json.loads('{' + content + '}', encoding='utf8')
+                    if content_dict.has_key('floorcontent'):
+                        item['content'].append(content_dict['floorcontent'])
+                if item:
+                    item['content'] = re.sub(r'\n|\t|\r', '', ' '.join(item['content']))       
+                    print 'url: ' + item['url'] + ' is added'
+                    return item
+            except:
+                print item['url'] + ' load failed.'
+                pass
         else:
             return
         
