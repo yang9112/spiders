@@ -114,7 +114,7 @@ class TianyaBBSSpider(Spider):
         if len(elem_list) > 0:
             for elem in elem_list:
                 item = DataItem()
-                item['type'] = 'forum'
+                item['dtype'] = 'forum'
                 item['source'] = '天涯论坛'
                 try:
                     item['title'] = elem.div.h3.a.get_text()

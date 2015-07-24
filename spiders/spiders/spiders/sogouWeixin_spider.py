@@ -92,7 +92,7 @@ class SogouWeixinSpider(Spider):
         if len(elem_list) > 0:
             for elem in elem_list:
                 item = DataItem()
-                item['type'] = 'weixin'
+                item['dtype'] = 'weixin'
                 item['source'] = '搜狗微信'
                 if elem.h4.a.get_text():
                     item['title'] = elem.h4.a.get_text()

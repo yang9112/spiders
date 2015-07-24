@@ -94,7 +94,7 @@ class BingNewSpider(Spider):
         if len(elem_list) > 0:
             for elem in elem_list:
                 item = DataItem()
-                item['type'] = 'news'
+                item['dtype'] = 'news'
                 item['source'] = '必应资讯'
                 title = elem.find('div', 'newstitle')
                 if title and title.a.get_text():

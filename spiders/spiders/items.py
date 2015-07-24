@@ -9,7 +9,7 @@ import scrapy
 
 class DataItem(scrapy.Item):
     # define the fields for your item here like:
-    type = scrapy.Field()
+    dtype = scrapy.Field()
     medianame = scrapy.Field()
     pubtime = scrapy.Field()
     collecttime = scrapy.Field()

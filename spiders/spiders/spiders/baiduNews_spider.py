@@ -97,7 +97,7 @@ class BaiduNewSpider(Spider):
         if len(elem_list)>0:
             for elem in elem_list:
                 item = DataItem()
-                item['type'] = 'news'
+                item['dtype'] = 'news'
                 item['source'] = '百度新闻'
                 try:
                     item['title'] = elem.h3.a.get_text()

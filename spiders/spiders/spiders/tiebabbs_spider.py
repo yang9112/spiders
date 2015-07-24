@@ -107,7 +107,7 @@ class BaiduNewSpider(Spider):
         if len(elem_list)>0:
             for elem in elem_list:
                 item = DataItem()
-                item['type'] = 'forum'
+                item['dtype'] = 'forum'
                 item['source'] = '百度贴吧'
                 try:
                     item['pubtime'] = elem.find('font', class_='p_date').get_text()

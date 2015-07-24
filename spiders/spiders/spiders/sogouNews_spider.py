@@ -101,7 +101,7 @@ class SogouNewSpider(Spider):
         if len(elem_list) > 0:
             for elem in elem_list:
                 item = DataItem()
-                item['type'] = 'news'
+                item['dtype'] = 'news'
                 item['source'] = '搜狗新闻'
                 if elem.h3.a.get_text():
                     item['title'] = elem.h3.a.get_text()

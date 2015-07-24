@@ -91,11 +91,18 @@ class HBaseTest(object):
         #将scrapy产生的Item存入hbase
         columnFamily=self.columnFamilies[0]
         
-        mutation = [Mutation(column=columnFamily+label,value=item.get(label).encode('utf8')) for label in item.keys()]
-
         rowKey=item.get('url','not set')
         if rowKey == 'not set':
             return
+        
+        mutation = []
+        for label in item.keys():
+            val = item.get(label).encode('utf8')
+            if label == 'dtype':
+                label = 'type'
+            
+            mutation.append(Mutation(column=columnFamily+label,value=val))
+            
         self.client.mutateRow(self.table, rowKey, mutation, {})
               
     def getRow(self, row):
