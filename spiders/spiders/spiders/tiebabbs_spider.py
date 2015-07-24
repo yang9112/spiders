@@ -97,10 +97,12 @@ class BaiduNewSpider(Spider):
         if response.body:
             bsoup = BeautifulSoup(response.body,from_encoding='utf-8')
         main_content = bsoup.find('div', class_='s_post_list')
-       
+              
+        items = []
         if main_content:
             elem_list = main_content.find_all('div', class_='s_post')
-        items = []
+        else:
+            return items
         
         if len(elem_list)>0:
             for elem in elem_list:
