@@ -9,6 +9,7 @@ from scrapy import log
 from spiders.items import DataItem
 from spiders.tools import Utools
 from spiders.query import GetQuery
+from spiders.dataCleaner import dataCleaner
 from bs4 import BeautifulSoup
 from redis import Redis
 import time
@@ -24,6 +25,7 @@ class BingNewSpider(Spider):
     domain_url = "http://cn.bing.com"
     start_urls = []
     tool = Utools()
+    dc = dataCleaner()
 
     def __init__ (self):
         super(BingNewSpider,self).__init__()
@@ -77,11 +79,12 @@ class BingNewSpider(Spider):
             if self.r.sismember('crawled_set', item['url']):  
                 return        
         
-        print 'url: ' + item['url'] + ' is added'
         if response.body:
             bsoup = BeautifulSoup(response.body,from_encoding='utf-8')
-            item['content'] = bsoup.get_text()
-            return item
+            item['content'] = self.dc.process(str(bsoup))
+            if item['content']:
+                print 'url: ' + item['url'] + ' is added'
+                return item
 
     def parse_items(self,response):
         if response.body:

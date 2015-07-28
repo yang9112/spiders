@@ -9,6 +9,7 @@ from scrapy import log
 from spiders.items import DataItem
 from spiders.tools import Utools
 from spiders.query import GetQuery
+from spiders.dataCleaner import dataCleaner
 from bs4 import BeautifulSoup
 from redis import Redis
 import json,re
@@ -23,6 +24,7 @@ class BaiduNewSpider(Spider):
     name = "baidunew"
     domain_url = "http://news.baidu.com"
     tool = Utools()
+    dc = dataCleaner()
     start_urls = []
     
     def __init__ (self):
@@ -56,7 +58,7 @@ class BaiduNewSpider(Spider):
         items = self.parse_items(response)
         #构造一个Xpath的select对象，用来进行网页元素抽取
         sel = Selector(response)
-
+        
         #尝试寻找下一页
         requests = []
         try:
@@ -82,9 +84,10 @@ class BaiduNewSpider(Spider):
         
         if response.body:
             bsoup = BeautifulSoup(response.body,from_encoding='utf-8')
-            item['content'] = bsoup.get_text()
-            print 'url: ' + item['url'] + ' is added'
-            yield item
+            item['content'] = self.dc.process(str(bsoup))
+            if item['content']:
+                print 'url: ' + item['url'] + ' is added'
+                return item
 
     def parse_items(self,response):
         if response.body:

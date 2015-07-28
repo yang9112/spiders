@@ -42,8 +42,7 @@ class BaiduNewSpider(Spider):
 
     def getStartUrl(self):
         #从文件初始化查询关键词
-        #qlist = GetQuery().get_data()
-        qlist = ['好声音', '优衣库']        
+        qlist = GetQuery().get_data()
         for query in qlist:
             if query:
                 #默认时间排序
