@@ -18,3 +18,4 @@ class DataItem(scrapy.Item):
     source =scrapy.Field()
     url = scrapy.Field()
     content = scrapy.Field()
+    channel = scrapy.Field()

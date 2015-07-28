@@ -108,6 +108,7 @@ class BaiduNewSpider(Spider):
                 item = DataItem()
                 item['dtype'] = 'forum'
                 item['source'] = '百度贴吧'
+                item['channel'] = 'Search engine'
                 try:
                     item['pubtime'] = elem.find('font', class_='p_date').get_text()
                     if self.tool.old_news(item['pubtime']):

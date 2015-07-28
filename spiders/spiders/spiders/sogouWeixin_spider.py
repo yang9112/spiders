@@ -94,6 +94,7 @@ class SogouWeixinSpider(Spider):
                 item = DataItem()
                 item['dtype'] = 'weixin'
                 item['source'] = '搜狗微信'
+                item['channel'] = 'Search engine'
                 if elem.h4.a.get_text():
                     item['title'] = elem.h4.a.get_text()
                 else:

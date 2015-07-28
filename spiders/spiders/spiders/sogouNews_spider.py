@@ -106,6 +106,7 @@ class SogouNewSpider(Spider):
                 item = DataItem()
                 item['dtype'] = 'news'
                 item['source'] = '搜狗新闻'
+                item['channel'] = 'Search engine'
                 if elem.h3.a.get_text():
                     item['title'] = elem.h3.a.get_text()
                 else:

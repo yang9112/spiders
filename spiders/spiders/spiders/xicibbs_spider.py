@@ -122,6 +122,7 @@ class BaiduNewSpider(Spider):
                 item = DataItem()
                 item['dtype'] = 'forum'
                 item['source'] = '西祠胡同'
+                item['channel'] = 'Search engine'
                 try:
                     item['title'] = elem.h3.a.get_text()
                 except:

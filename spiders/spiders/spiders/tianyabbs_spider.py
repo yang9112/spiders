@@ -116,6 +116,7 @@ class TianyaBBSSpider(Spider):
                 item = DataItem()
                 item['dtype'] = 'forum'
                 item['source'] = '天涯论坛'
+                item['channel'] = 'Search engine'
                 try:
                     item['title'] = elem.div.h3.a.get_text()
                 except:
