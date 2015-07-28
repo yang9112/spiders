@@ -19,47 +19,56 @@ class dataCleaner():
                  
     newlabels = set()
     
-    def __init__(self):
+    def __init__(self, flabel='./label.txt', fsigrep='./sig.txt'):
         pass
-    
+
     def delscript(self, content):
         return re.sub(r'<script.*?/script>', '', content)
     
     def delul(self, content):
-        return re.sub(r'<ul.*?/ul>', '', content)
+        return re.sub(r'<ul.*?</ul>', '', content)
     
     def delnote(self, content):
         return re.sub(r'<!--.*?-->', '', content)
     
     def delstyle(self, content):
-        return re.sub(r'<style.*?/style>', '', content)
+        return re.sub(r'<style .*?/style>', '', content)
     
     def delhyperlink1(self, content):
-        return re.sub(r'<a.*?</a>', '', content)
+        return re.sub(r'<a .*?</a>', '', content)
     
-    def clab(self, content,l):
-        beg = content.find(l)
-        while beg != -1:
-            end = self.findlabelbeg(content,beg)
-            if end != -1:
-                tmp = content[:beg]
-                content = tmp + content[end:]
-                beg = content.find(l)
-            else:
-                return -1
+    def cleanlabel(self, content):
+        for label in ['</font>', '</p>', '</span>']:
+            content = content.replace(label, '')
+
+        for label in ['<font.*?>', '<p.*?>', '<strong.*?>', 
+                      '<span.*?>', '<br.*?>', '<img.*?>']:            
+            content = re.sub(label, '', content)
         return content
     
     def extracttxt(self, content):
         maxcontent = ''
-        divmatch = re.compile('<div.*?</div>')    
+        divmatch = re.compile('<div.*?</div>')
         doubledivmatch = re.compile('<div.*?<div')
         clearmatch = re.compile('<.*?>')
+        
+        if len(divmatch.findall(content)) == 0:
+            for minicontent in re.findall('>(.*?)<', content):
+                minicontent = clearmatch.sub('', minicontent)
+                if len(minicontent) > len(maxcontent):
+                    maxcontent = minicontent
+        
+        if len(divmatch.findall(content)) >= 0:
+            for minicontent in re.findall('>(.*?)<', content):
+                minicontent = clearmatch.sub('', minicontent)
+                if len(minicontent) > len(maxcontent):
+                    maxcontent = minicontent
         
         while len(divmatch.findall(content)) > 0:
             for minicontent in divmatch.findall(content):
                 while len(doubledivmatch.findall(minicontent)) > 0:
                     minicontent = doubledivmatch.sub('<div', minicontent)
-                
+    
                 content = content.replace(minicontent, '')
                 minicontent = clearmatch.sub('', minicontent)
                 if len(minicontent) > len(maxcontent):
@@ -79,7 +88,7 @@ class dataCleaner():
             f = self.delstyle(f)
             
             f = self.delhyperlink1(f)
-            #f = self.cleanlabel(f)
+            f = self.cleanlabel(f)
             f = self.extracttxt(f)
             return f
         else:
@@ -89,11 +98,3 @@ class dataCleaner():
         for sig in self.sigrep:
            content = content.replace(sig,' ')
         return content
-
-#if __name__ == '__main__':
-#    CD = dataCleaner() 
-#    ff = open('a.txt', 'rb');
-#    f = ff.read()
-#    f = CD.process(f)
-#    f = CD.rep(f)
-#    ff.close()

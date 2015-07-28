@@ -20,7 +20,7 @@ ITEM_PIPELINES = {
     'spiders.pipelines.TestSpiderPipeline': 300,
     'spiders.pipelines.UrlsPipeline': 300,
     'scrapy.contrib.downloadermiddleware.useragent.UserAgentMiddleware' : None,    
-    'spiders.UserAgentMiddleware.RotateUserAgentMiddleware':100
+    'spiders.UserAgentMiddleware.RotateUserAgentMiddleware':400
 } 
 
 #the max depth of the spider
@@ -29,7 +29,7 @@ DEPTH_LIMIT = 1
 ##是否收集最大深度数据。
 #DEPTH_STATS = False
 
-DOWNLOAD_TIMEOUT = 8
+DOWNLOAD_TIMEOUT = 10
 
 #下载延迟
 DOWNLOAD_DELAY = 0.5#500MS OF DELAY
