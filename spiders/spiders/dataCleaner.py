@@ -32,10 +32,12 @@ class dataCleaner():
         return re.sub(r'<!--.*?-->', '', content)
     
     def delstyle(self, content):
-        return re.sub(r'<style .*?/style>', '', content)
+        return re.sub(r'<style.*?/style>', '', content)
     
     def delhyperlink1(self, content):
-        return re.sub(r'<a .*?</a>', '', content)
+        content = re.sub(r'<a .*?</a>', '', content)
+        content = re.sub(r'<a>.*?</a>', '', content)
+        return content
     
     def cleanlabel(self, content):
         for label in ['</font>', '</p>', '</span>']:
@@ -51,12 +53,6 @@ class dataCleaner():
         divmatch = re.compile('<div.*?</div>')
         doubledivmatch = re.compile('<div.*?<div')
         clearmatch = re.compile('<.*?>')
-        
-        if len(divmatch.findall(content)) == 0:
-            for minicontent in re.findall('>(.*?)<', content):
-                minicontent = clearmatch.sub('', minicontent)
-                if len(minicontent) > len(maxcontent):
-                    maxcontent = minicontent
         
         if len(divmatch.findall(content)) >= 0:
             for minicontent in re.findall('>(.*?)<', content):
