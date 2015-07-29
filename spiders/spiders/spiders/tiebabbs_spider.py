@@ -9,6 +9,7 @@ from scrapy import log
 from spiders.items import DataItem
 from spiders.tools import Utools
 from spiders.query import GetQuery
+from spiders.dataCleaner import dataCleaner
 from bs4 import BeautifulSoup
 from redis import Redis
 import json,re
@@ -22,7 +23,8 @@ sys.setdefaultencoding('utf-8')
 class BaiduNewSpider(Spider):
     name = "tiebabbs"
     domain_url = "http://tieba.baidu.com"
-    tool = Utools()
+    tool = Utools()    
+    dc = dataCleaner()
     start_urls = []
     
     def __init__ (self):
@@ -101,6 +103,7 @@ class BaiduNewSpider(Spider):
             
             if item:
                 item['content'] = ' '.join(item['content']).encode('utf8')
+                item['content'] = self.dc.rep(item['content'])
                 print 'url: ' + item['url'] + ' is added'
                 yield item
 

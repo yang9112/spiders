@@ -86,6 +86,7 @@ class dataCleaner():
             f = self.delhyperlink1(f)
             f = self.cleanlabel(f)
             f = self.extracttxt(f)
+            f = self.rep(f)
             return f
         else:
             return None

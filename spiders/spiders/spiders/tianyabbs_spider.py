@@ -9,6 +9,7 @@ from scrapy import log
 from spiders.items import DataItem
 from spiders.tools import Utools
 from spiders.query import GetQuery
+from spiders.dataCleaner import dataCleaner
 from bs4 import BeautifulSoup
 from redis import Redis
 import time
@@ -22,9 +23,10 @@ sys.setdefaultencoding('utf-8')
 class TianyaBBSSpider(Spider):
     name = "tianyabbs"
     domain_url = "http://search.tianya.cn/"
+    tool = Utools()    
+    dc = dataCleaner()
     start_urls = []
-    tool = Utools()
-
+    
     def __init__ (self):
         super(TianyaBBSSpider,self).__init__()
         #将final绑定到爬虫结束的事件上
@@ -48,7 +50,6 @@ class TianyaBBSSpider(Spider):
         #pageTag = '&s=6'   
         #默认相关性排序       
         
-#        qlist = ['中国电信']
         qlist = GetQuery().get_data()
         for query in qlist:
             if query:
@@ -96,7 +97,7 @@ class TianyaBBSSpider(Spider):
                 item['content'] = item_content_list[0].get_text().encode('utf8')
             #item['content'] = ' '.join(v.get_text().encode('utf8') for v in item_content_list)
             item['content'] = re.sub(r'\n|\t|\r', '', item['content'])
-
+            item['content'] = self.dc.rep(item['content'])
             if item['content']:
                 print 'url: ' + item['url'] + ' is added' 
                 return item
