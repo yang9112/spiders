@@ -191,6 +191,7 @@ def demo():
     items.append({'url':'http://article.pchome.net/content-1773854.html','name':'1773854'.encode('utf8')})
     #ht.putsResults(items)
     ht.put_Item(items[1])
+    
 #    for row in ht.scannerWithColumns(needs=4,columns=['newsProperty:title']):
 #        print json.dumps(row,ensure_ascii=False)
     ht.close_trans()
