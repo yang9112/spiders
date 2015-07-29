@@ -12,7 +12,7 @@ class Utools():
     HOST_REDIS = '10.133.5.48'
 
     #second
-    time_interval = 3600
+    time_interval = 3600*24*3
     
     def old_news(self, pubtime):
         try:

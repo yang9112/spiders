@@ -10,6 +10,7 @@ from spiders.items import DataItem
 from spiders.tools import Utools
 from spiders.query import GetQuery
 from spiders.dataCleaner import dataCleaner
+from spiders.hbaseClient import HBaseTest
 from bs4 import BeautifulSoup
 from redis import Redis
 import json,re
@@ -38,9 +39,11 @@ class BaiduNewSpider(Spider):
         self.log('---started----')
         self.getStartUrl()
         self.r = Redis(host = self.tool.HOST_REDIS, port = 6379, db = 0)
+        self.htable=HBaseTest(table = 'origin')
 
     def finalize(self):
         self.log('---stopped---')
+        self.htable.close_trans()
         #url持久化
 
     def getStartUrl(self):
@@ -80,8 +83,9 @@ class BaiduNewSpider(Spider):
 
         if item['url'].find('?') >= 0:
             item['url'] = response.url
-            if self.r.sismember('crawled_set', item['url']):  
-                return         
+            if self.r.sismember('crawled_set', item['url']):
+                if self.htable.getRowByColumns(item['url'], ['indexData:url']):
+                    return                         
         
         if response.body:
             bsoup = BeautifulSoup(response.body,from_encoding='utf-8')
@@ -131,9 +135,10 @@ class BaiduNewSpider(Spider):
                     print 'no element of author'
                     continue
 
-                if self.r.sismember('crawled_set', item['url']):  
-                    continue
-                
+                if self.r.sismember('crawled_set', item['url']):
+                    if self.htable.getRowByColumns(item['url'], ['indexData:url']):
+                        continue
+            
                 item['collecttime'] = time.strftime("%Y-%m-%d %H:%M", time.localtime())
                 if elem.find('div',class_='c-summary'):
                     item['abstract'] = elem.find('div',class_='c-summary').get_text()

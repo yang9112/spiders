@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 
-
 import sys
 import json
 #sys.path.append('/usr/local/lib/python2.7/site-packages')
@@ -177,8 +176,8 @@ class HBaseTest(object):
         self.client.mutateRows(self.table, results, {})
 
 def demo():
-    columnFamilies=['indexData:','result:']
-    ht = HBaseTest(table='test_new', columnFamilies=columnFamilies)
+#    columnFamilies=['indexData:','result:']
+    ht = HBaseTest(table='themes')
 #    item={}
 #    item['url']='http://article.pchome.net/content-1773855.html'
 #    
@@ -186,11 +185,12 @@ def demo():
 #        print json.dumps(row,ensure_ascii=False)
 #    print ht.getTableReginons()
 #    print ht.getRow(item['url'])
-    items=[]
-    items.append({'url':'http://article.pchome.net/content-1773855.html','name':'name'.encode('utf8'),'key':'url'.encode('utf8')})
-    items.append({'url':'http://article.pchome.net/content-1773854.html','name':'1773854'.encode('utf8')})
-    #ht.putsResults(items)
-    ht.put_Item(items[1])
+#    items=[]
+#    items.append({'url':'http://article.pchome.net/content-1773855.html','name':'name'.encode('utf8'),'key':'url'.encode('utf8')})
+#    items.append({'url':'http://article.pchome.net/content-1773854.html','name':'1773854'.encode('utf8')})
+#    #ht.putsResults(items)
+#    ht.put_Item(items[0])
+    print ht.getRowByColumns('http://www.xici.net/d219995605.htm', ['indexData:url', 'indexData:pubtime'])
     
 #    for row in ht.scannerWithColumns(needs=4,columns=['newsProperty:title']):
 #        print json.dumps(row,ensure_ascii=False)

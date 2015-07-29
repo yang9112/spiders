@@ -31,7 +31,7 @@ class TestSpiderPipeline(object):
         return item
 
     def initialize(self):
-        self.htable=HBaseTest(table = 'origin', host='10.133.5.49')
+        self.htable=HBaseTest(table = 'origin')
 #        self.htable=HBaseTest(table = 'test')
 		
     def finalize(self):

@@ -10,6 +10,7 @@ from spiders.items import DataItem
 from spiders.tools import Utools
 from spiders.query import GetQuery
 from spiders.dataCleaner import dataCleaner
+from spiders.hbaseClient import HBaseTest
 from bs4 import BeautifulSoup
 from redis import Redis
 import time
@@ -38,9 +39,11 @@ class SogouNewSpider(Spider):
     def initial(self):
         self.log('---started----')
         self.getStartUrl()
+        self.htable=HBaseTest(table = 'origin')
 
     def finalize(self):
         self.log('---stopped---')
+        self.htable.close_trans()
         #url持久化
 
     def getStartUrl(self):
@@ -83,8 +86,9 @@ class SogouNewSpider(Spider):
         
         if item['url'].find('?') >= 0:
             item['url'] = response.url
-            if self.r.sismember('crawled_set', item['url']):  
-                return        
+            if self.r.sismember('crawled_set', item['url']):
+                if self.htable.getRowByColumns(item['url'], ['indexData:url']):
+                    return        
         
         if response.body:
             bsoup = BeautifulSoup(response.body, from_encoding='utf8')
@@ -126,8 +130,9 @@ class SogouNewSpider(Spider):
                 else:
                     item['source'] = author.split()[0]
 
-                if self.r.sismember('crawled_set', item['url']):  
-                    continue
+                if self.r.sismember('crawled_set', item['url']):
+                    if self.htable.getRowByColumns(item['url'], ['indexData:url']):
+                        continue
                 
                 item['collecttime'] = time.strftime("%Y-%m-%d %H:%M", time.localtime())
                 item['abstract']=elem.find('div',class_='ft').get_text()
