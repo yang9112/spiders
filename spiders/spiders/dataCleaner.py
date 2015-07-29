@@ -27,6 +27,9 @@ class dataCleaner():
     
     def delul(self, content):
         return re.sub(r'<ul.*?</ul>', '', content)
+        
+    def defli(self, content):
+        return re.sub(r'<li.*?</li>', '',content)
     
     def delnote(self, content):
         return re.sub(r'<!--.*?-->', '', content)
@@ -79,6 +82,7 @@ class dataCleaner():
             
             f = self.delscript(f)
             f = self.delul(f)
+            f = self.defli(f)
             
             f = self.delnote(f)
             f = self.delstyle(f)
