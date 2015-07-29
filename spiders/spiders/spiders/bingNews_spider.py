@@ -19,6 +19,7 @@ import urllib
 
 reload(sys)
 sys.setdefaultencoding('utf-8')
+sys.setrecursionlimit(5000)
 
 class BingNewSpider(Spider):
     name = "bingnew"
@@ -80,7 +81,7 @@ class BingNewSpider(Spider):
                 return        
         
         if response.body:
-            bsoup = BeautifulSoup(response.body,from_encoding='utf-8')
+            bsoup = BeautifulSoup(response.body, from_encoding='utf-8')
             item['content'] = self.dc.process(str(bsoup))
             if item['content']:
                 print 'url: ' + item['url'] + ' is added'

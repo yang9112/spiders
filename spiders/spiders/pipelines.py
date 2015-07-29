@@ -77,14 +77,14 @@ class UrlsPipeline(object):
         if len(self.urls) > 0:
             pipe=self.client.pipeline()
             for url in self.urls:
-                pipe.rpush('linkse',url.encode('utf8'))
+                pipe.rpush('linkbase',url.encode('utf8'))
             pipe.execute()
 
     def writeToRedis(self):
         if mutex.acquire(1):
             pipe=self.client.pipeline()
             for url in self.urls:
-                pipe.rpush('linkse',url.encode('utf8'))
+                pipe.rpush('linkbase',url.encode('utf8'))
             pipe.execute()
             self.urls=[]
             mutex.release()

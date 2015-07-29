@@ -19,6 +19,7 @@ import urllib
 
 reload(sys)
 sys.setdefaultencoding('utf-8')
+sys.setrecursionlimit(5000)
 
 class SogouNewSpider(Spider):
     name = "sogounew"

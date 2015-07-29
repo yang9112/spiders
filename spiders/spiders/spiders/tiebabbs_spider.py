@@ -83,9 +83,21 @@ class BaiduNewSpider(Spider):
             else:
                 return
             
+            timeform = '%Y-%m-%d %H:%M'
+            pubtimes = [time.strptime(item['pubtime'], timeform)]
+            for pubtime in re.findall('/d{4}-/d{2}-/d{2} /d{2}:/d{2}', str(bsoup)):
+                pubtimes.append(time.strptime(pubtime, timeform))
+        
+            item['pubtime'] = time.strftime(timeform, min(pubtimes))
+            if self.tool.old_news(item['pubtime']):
+                print item['utl'] + ' ' + item['pubtime']
+                return           
+            
             item['content'] = []
             for elem in bsoup.find_all('div', class_='d_post_content'):
                 item['content'].append(elem.get_text())
+                #onlt get the first floor
+                break
             
             if item:
                 item['content'] = ' '.join(item['content']).encode('utf8')

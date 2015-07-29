@@ -99,6 +99,8 @@ class BaiduNewSpider(Spider):
                     content_dict = json.loads('{' + content + '}', encoding='utf8')
                     if content_dict.has_key('floorcontent'):
                         item['content'].append(content_dict['floorcontent'])
+                        #only get the first floor                        
+                        break
                 if item:
                     item['content'] = re.sub(r'\n|\t|\r', '', ' '.join(item['content']))       
                     print 'url: ' + item['url'] + ' is added'

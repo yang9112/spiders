@@ -86,18 +86,20 @@ class TianyaBBSSpider(Spider):
             if self.r.sismember('crawled_set', item['url']):
                 return        
         
-        print 'url: ' + item['url'] + ' is added' 
         if response.body:
             bsoup = BeautifulSoup(response.body)
-#        from scrapy.shell import inspect_response
-#        inspect_response(response, self)
-        
-        item_content_list = bsoup.find_all('div', class_='bbs-content')
-        
-        item['content'] = ' '.join(v.get_text().encode('utf8') for v in item_content_list)
-        item['content'] = re.sub(r'\n|\t|\r', '', item['content'])
-        if item['content']:        
-            return item
+            
+            item_content_list = bsoup.find_all('div', class_='bbs-content')
+            
+            #only get the first floor
+            if len(item_content_list) > 0:
+                item['content'] = item_content_list[0].get_text().encode('utf8')
+            #item['content'] = ' '.join(v.get_text().encode('utf8') for v in item_content_list)
+            item['content'] = re.sub(r'\n|\t|\r', '', item['content'])
+
+            if item['content']:
+                print 'url: ' + item['url'] + ' is added' 
+                return item
 
     def parse_items(self,response):
         if response.body:

@@ -10,6 +10,9 @@ class Utools():
     HOST_HBASE = '10.133.5.49'
     HOST_SQL = '10.133.5.48'
     HOST_REDIS = '10.133.5.48'
+
+    #second
+    time_interval = 3600    
     
     def old_news(self, pubtime):
         try:
@@ -20,8 +23,10 @@ class Utools():
         local_time_value = time.mktime(time.localtime())
         
         #只抓取24小时内的数据
-        return (local_time_value - old_time_value) > 86400
-        
+        return (local_time_value - old_time_value) > self.time_interval
+    
+    def set_timeinterval(self, new_interval):
+        self.time_interval = new_interval
 
 if __name__ == '__main__':
     ut = Utools()
