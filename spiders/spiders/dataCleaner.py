@@ -39,6 +39,10 @@ class dataCleaner():
     def delstyle(self, content):
         content = re.sub(r'<style .*?</style>', '', content)
         return re.sub(r'<style>.*?</style>', '', content)
+    
+    def deloption(self, content):
+        content = re.sub(r'<option .*?</option>', '', content)
+        return re.sub(r'<option>.*?</option>', '', content)
 
 #    #do not need to clear the hyperlink in content    
 #    def delhyperlink1(self, content):
@@ -109,6 +113,7 @@ class dataCleaner():
             
             f = self.delnote(f)
             f = self.delstyle(f)
+            f = self.deloption(f)
             
             #f = self.delhyperlink1(f)
             f = self.cleanlabel(f)
