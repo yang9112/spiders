@@ -56,7 +56,7 @@ class BaiduNewSpider(Spider):
             
     #一个回调函数中返回多个Request以及Item的例子
     def parse(self,response):
-        #print '====start %s==' %response.url
+        print '====start %s==' %response.url
         self.log('a response from %s just arrived!' %response.url)
         #抽取并解析新闻网页内容
         items = self.parse_items(response)
@@ -93,7 +93,18 @@ class BaiduNewSpider(Spider):
         
         if len(content_list) > 0:
             try:
-                content_list[0] = re.sub('<.*?>', '', content_list[0]).replace('{','').replace('}', '')
+                #store the keys
+                content_list[0] = re.sub('<div.*?>', '<p>', content_list[0]).replace('</div>', '</p>')
+                tags = re.findall('<.*?>', content_list[0].encode('utf8'))
+                tagdict = dict()
+                for i in range(len(tags)):
+                    tagdict.setdefault('&tag_' + str(i) + ';', tags[i])
+                
+                for key in tagdict.keys():
+                    content_list[0] = content_list[0].replace(tagdict[key], key)
+                    tagdict[key] = str(tagdict[key].replace('\\"', ''))
+
+                content_list[0] = content_list[0].replace('{','').replace('}', '')
                 maindict = json.loads('{' + content_list[0] + '}', encoding='utf8')
                 item['medianame'] = maindict['UserName']
                 item['pubtime'] = maindict['really_updated_at'][:-3]
@@ -104,12 +115,16 @@ class BaiduNewSpider(Spider):
                     content = re.sub('<.*?>', '', content).replace('{','').replace('}', '')
                     content_dict = json.loads('{' + content + '}', encoding='utf8')
                     if content_dict.has_key('floorcontent'):
+                        #release the tags
+                        for key in tagdict.keys():
+                            content_dict['floorcontent'] = content_dict['floorcontent'].replace(key, tagdict[key])
+
+                        content_dict['floorcontent'] = content_dict['floorcontent']                         
                         item['content'].append(content_dict['floorcontent'])
                         #only get the first floor                        
                         break
                 if item:
-                    item['content'] = re.sub(r'\n|\t|\r', '', ' '.join(item['content']))
-                    item['content'] = self.dc.rep(item['content'])
+                    item['content'] = self.dc.process('<div>' + ' '.join(item['content']) + '</div>')
                     print 'url: ' + item['url'] + ' is added'
                     return item
             except:
