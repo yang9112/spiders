@@ -23,31 +23,49 @@ class dataCleaner():
         pass
 
     def delscript(self, content):
-        return re.sub(r'<script.*?/script>', '', content)
+        return re.sub(r'<script.*?</script>', '', content)
     
     def delul(self, content):
-        return re.sub(r'<ul.*?</ul>', '', content)
+        content = re.sub(r'<ul .*?</ul>', '', content)
+        return re.sub(r'<ul>.*?</ul>', '', content)
         
     def defli(self, content):
-        return re.sub(r'<li.*?</li>', '',content)
+        content = re.sub(r'<li .*?</li>', '',content)
+        return re.sub(r'<li>.*?</li>', '',content)
     
     def delnote(self, content):
         return re.sub(r'<!--.*?-->', '', content)
     
     def delstyle(self, content):
-        return re.sub(r'<style.*?/style>', '', content)
-    
-    def delhyperlink1(self, content):
-        content = re.sub(r'<a .*?</a>', '', content)
-        content = re.sub(r'<a>.*?</a>', '', content)
+        content = re.sub(r'<style .*?</style>', '', content)
+        return re.sub(r'<style>.*?</style>', '', content)
+
+#    #do not need to clear the hyperlink in content    
+#    def delhyperlink1(self, content):
+#        content = re.sub(r'<a .*?</a>', '', content)
+#        content = re.sub(r'<a>.*?</a>', '', content)
+#        return content
+    def wfromreplace(self, content):
+        labels = ['<span>' , '<strong>', '<p>', '<font>',
+                  '</span>', '</strong>', '</p>', '</font>']        
+        for label in labels:
+            content = content.replace(label, '&lleft;' + label[1:-1] + '&lright;')
+
+        labels = ['<p .*?>', '<font .*?>', '<img .*?>', 
+                  '<span .*?>', '<br.*?>', '<strong .*?>']
+        for labeltp in labels:
+            for label in re.findall(labeltp, content):
+                content = content.replace(label, '&lleft;' + label[1:-1] + '&lright;')        
         return content
-    
+        
+    def wfromtback(self, content):
+        return content.replace('&lleft;', '<').replace('&lright;', '>')
+        
     def cleanlabel(self, content):
-        for label in ['</font>', '</p>', '</span>']:
+        for label in ['</a>']:
             content = content.replace(label, '')
 
-        for label in ['<font.*?>', '<p.*?>', '<strong.*?>', 
-                      '<span.*?>', '<br.*?>', '<img.*?>']:            
+        for label in ['<a .*?>']:            
             content = re.sub(label, '', content)
         return content
     
@@ -57,10 +75,13 @@ class dataCleaner():
         doubledivmatch = re.compile('<div.*?<div')
         clearmatch = re.compile('<.*?>')
         
+        content = self.wfromreplace(content)
+
         if len(divmatch.findall(content)) >= 0:
             for minicontent in re.findall('>(.*?)<', content):
                 minicontent = clearmatch.sub('', minicontent)
-                if len(minicontent) > len(maxcontent):
+                minicontent = self.wfromtback(minicontent)
+                if len(clearmatch.sub('', minicontent)) > len(maxcontent):
                     maxcontent = minicontent
         
         while len(divmatch.findall(content)) > 0:
@@ -70,7 +91,8 @@ class dataCleaner():
     
                 content = content.replace(minicontent, '')
                 minicontent = clearmatch.sub('', minicontent)
-                if len(minicontent) > len(maxcontent):
+                minicontent = self.wfromtback(minicontent)
+                if len(clearmatch.sub('', minicontent)) > len(maxcontent):
                     maxcontent = minicontent
         
         return maxcontent
@@ -78,7 +100,8 @@ class dataCleaner():
     def process(self, content):
         if content:        
             f = content.lower()
-            f = re.sub('\n|\r|\t', '', f)
+            for label in ['\n', '\r', '\t']:
+                f = f.replace(label, '')
             
             f = self.delscript(f)
             f = self.delul(f)
@@ -87,7 +110,7 @@ class dataCleaner():
             f = self.delnote(f)
             f = self.delstyle(f)
             
-            f = self.delhyperlink1(f)
+            #f = self.delhyperlink1(f)
             f = self.cleanlabel(f)
             f = self.extracttxt(f)
             f = self.rep(f)
@@ -99,3 +122,4 @@ class dataCleaner():
         for sig in self.sigrep:
            content = content.replace(sig,' ')
         return content
+        

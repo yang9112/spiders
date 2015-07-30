@@ -38,11 +38,11 @@ class TianyaBBSSpider(Spider):
         self.log('---started----')
         self.getStartUrl()
         self.r = Redis(host = self.tool.HOST_REDIS, port = 6379, db = 0)        
-        self.htable=HBaseTest(table = 'origin')
+        #self.htable=HBaseTest(table = 'origin')
 
     def finalize(self):
         self.log('---stopped---')
-        self.htable.close_trans()
+        #self.htable.close_trans()
         #url持久化
 
     def getStartUrl(self):
@@ -88,8 +88,8 @@ class TianyaBBSSpider(Spider):
         if item['url'].find('?') >= 0:
             item['url'] = response.url
             if self.r.sismember('crawled_set', item['url']):
-                if self.htable.getRowByColumns(item['url'], ['indexData:url']):
-                    return        
+                #if self.htable.getRowByColumns(item['url'], ['indexData:url']):
+                return        
         
         if response.body:
             bsoup = BeautifulSoup(response.body)
@@ -148,8 +148,8 @@ class TianyaBBSSpider(Spider):
                     return
 
                 if self.r.sismember('crawled_set', item['url']):  
-                    if self.htable.getRowByColumns(item['url'], ['indexData:url']):
-                        continue
+                    #if self.htable.getRowByColumns(item['url'], ['indexData:url']):
+                    continue
                 
                 item['collecttime'] = time.strftime("%Y-%m-%d %H:%M", time.localtime())                
                 item['abstract']=elem.div.p.get_text()

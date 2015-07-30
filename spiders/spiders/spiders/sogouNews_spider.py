@@ -39,11 +39,11 @@ class SogouNewSpider(Spider):
     def initial(self):
         self.log('---started----')
         self.getStartUrl()
-        self.htable=HBaseTest(table = 'origin')
+        #self.htable=HBaseTest(table = 'origin')
 
     def finalize(self):
         self.log('---stopped---')
-        self.htable.close_trans()
+        #self.htable.close_trans()
         #url持久化
 
     def getStartUrl(self):
@@ -87,8 +87,8 @@ class SogouNewSpider(Spider):
         if item['url'].find('?') >= 0:
             item['url'] = response.url
             if self.r.sismember('crawled_set', item['url']):
-                if self.htable.getRowByColumns(item['url'], ['indexData:url']):
-                    return        
+                #if self.htable.getRowByColumns(item['url'], ['indexData:url']):
+                return        
         
         if response.body:
             bsoup = BeautifulSoup(response.body, from_encoding='utf8')
@@ -131,8 +131,8 @@ class SogouNewSpider(Spider):
                     item['source'] = author.split()[0]
 
                 if self.r.sismember('crawled_set', item['url']):
-                    if self.htable.getRowByColumns(item['url'], ['indexData:url']):
-                        continue
+                    #if self.htable.getRowByColumns(item['url'], ['indexData:url']):
+                    continue
                 
                 item['collecttime'] = time.strftime("%Y-%m-%d %H:%M", time.localtime())
                 item['abstract']=elem.find('div',class_='ft').get_text()

@@ -39,11 +39,11 @@ class BingNewSpider(Spider):
     def initial(self):
         self.log('---started----')
         self.getStartUrl()
-        self.htable=HBaseTest(table = 'origin')
+        #self.htable=HBaseTest(table = 'origin')
 
     def finalize(self):
         self.log('---stopped---')
-        self.htable.close_trans()
+        #self.htable.close_trans()
         #url持久化
 
     def getStartUrl(self):
@@ -81,8 +81,8 @@ class BingNewSpider(Spider):
         if item['url'].find('?') >= 0:
             item['url'] = response.url
             if self.r.sismember('crawled_set', item['url']):  
-                if self.htable.getRowByColumns(item['url'], ['indexData:url']):
-                    return        
+                #if self.htable.getRowByColumns(item['url'], ['indexData:url']):
+                return        
         
         if response.body:
             bsoup = BeautifulSoup(response.body, from_encoding='utf-8')
@@ -128,8 +128,8 @@ class BingNewSpider(Spider):
                     continue
                 
                 if self.r.sismember('crawled_set', item['url']): 
-                    if self.htable.getRowByColumns(item['url'], ['indexData:url']):
-                        continue
+                    #if self.htable.getRowByColumns(item['url'], ['indexData:url']):
+                    continue
                 
                 item['collecttime'] = time.strftime("%Y-%m-%d %H:%M", time.localtime())
                 if elem.find('span',class_='sn_snip'):
