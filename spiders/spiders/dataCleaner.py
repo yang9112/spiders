@@ -67,10 +67,10 @@ class dataCleaner():
         
     def cleanlabel(self, content):
         for label in ['</a>']:
-            content = content.replace(label, '')
+            content = content.replace(label, '&aright;')
 
         for label in ['<a .*?>']:            
-            content = re.sub(label, '', content)
+            content = re.sub(label, '&aleft;', content)
         return content
     
     def extracttxt(self, content):
@@ -78,6 +78,7 @@ class dataCleaner():
         divmatch = re.compile('<div.*?</div>')
         doubledivmatch = re.compile('<div.*?<div')
         clearmatch = re.compile('<.*?>')
+        clearmatch2 = re.compile('<.*?>|&aleft;.*?&aright;')
         
         content = self.wfromreplace(content)
 
@@ -85,7 +86,7 @@ class dataCleaner():
             for minicontent in re.findall('>(.*?)<', content):
                 minicontent = clearmatch.sub('', minicontent)
                 minicontent = self.wfromtback(minicontent)
-                if len(clearmatch.sub('', minicontent)) > len(maxcontent):
+                if len(clearmatch2.sub('', minicontent)) > len(maxcontent):
                     maxcontent = minicontent
         
         while len(divmatch.findall(content)) > 0:
@@ -96,9 +97,10 @@ class dataCleaner():
                 content = content.replace(minicontent, '')
                 minicontent = clearmatch.sub('', minicontent)
                 minicontent = self.wfromtback(minicontent)
-                if len(clearmatch.sub('', minicontent)) > len(maxcontent):
+                if len(clearmatch2.sub('', minicontent)) > len(maxcontent):
                     maxcontent = minicontent
         
+        maxcontent = maxcontent.replace('&aleft;', '').replace('&aright;', '')
         return maxcontent
             
     def process(self, content):
