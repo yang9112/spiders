@@ -98,10 +98,10 @@ class TianyaBBSSpider(Spider):
             
             #only get the first floor
             if len(item_content_list) > 0:
-                item['content'] = item_content_list[0].get_text().encode('utf8')
-            #item['content'] = ' '.join(v.get_text().encode('utf8') for v in item_content_list)
+                item['content'] = item_content_list[0].extract().encode('utf8')
+                #item['content'] = ' '.join(v.get_text().encode('utf8') for v in item_content_list)
             item['content'] = re.sub(r'\n|\t|\r', '', item['content'])
-            item['content'] = self.dc.rep(item['content'])
+            item['content'] = self.dc.process(item['content'])
             if item['content']:
                 print 'url: ' + item['url'] + ' is added' 
                 return item

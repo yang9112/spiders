@@ -100,13 +100,13 @@ class BaiduNewSpider(Spider):
             
             item['content'] = []
             for elem in bsoup.find_all('div', class_='d_post_content'):
-                item['content'].append(elem.get_text())
+                item['content'].append(str(elem.extract()))
                 #onlt get the first floor
                 break
             
             if item:
                 item['content'] = ' '.join(item['content']).encode('utf8')
-                item['content'] = self.dc.rep(item['content'])
+                item['content'] = self.dc.process(item['content'])
                 print 'url: ' + item['url'] + ' is added'
                 yield item
 
