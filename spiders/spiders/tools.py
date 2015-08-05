@@ -4,12 +4,12 @@
 import time
 
 class Utools():
-    HOST_HBASE = 'localhost'
-    HOST_SQL = 'localhost'
-    HOST_REDIS = 'localhost'
-#    HOST_HBASE = '10.133.5.53'
-#    HOST_SQL = '10.133.5.48'
-#    HOST_REDIS = '10.133.5.48'
+#    HOST_HBASE = 'localhost'
+#    HOST_SQL = 'localhost'
+#    HOST_REDIS = 'localhost'
+    HOST_HBASE = '10.133.5.53'
+    HOST_SQL = '10.133.5.48'
+    HOST_REDIS = '10.133.5.48'
 
     #second
     time_interval = 3600*24
