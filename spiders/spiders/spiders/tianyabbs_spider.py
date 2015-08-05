@@ -58,8 +58,8 @@ class TianyaBBSSpider(Spider):
         qlist = GetQuery().get_data()
         for query in qlist:
             if query:
-                new_url = self.domain_url + '/bbs?q=' + urllib.quote(query.encode('utf8')) + pageTag
-                self.start_urls.append(new_url)
+                query_url = '/bbs?q=' + urllib.quote(query.encode('utf8')) + pageTag
+                self.start_urls.append(self.domain_url + query_url)
         
     #一个回调函数中返回多个Request以及Item的例子
     def parse(self,response):

@@ -53,7 +53,8 @@ class BaiduNewSpider(Spider):
         for query in qlist:
             if query:
                 #默认时间排序
-                self.start_urls.append(self.domain_url+"/f/search/res?ie=utf-8&rn=20&qw="+urllib.quote(query.encode('utf8')) + '&ct=0')
+                query_url = "/f/search/res?ie=utf-8&rn=20&qw=" + urllib.quote(query.encode('utf8')) + '&ct=0'
+                self.start_urls.append(self.domain_url + query_url)
 
     #一个回调函数中返回多个Request以及Item的例子
     def parse(self,response):

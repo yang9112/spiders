@@ -54,7 +54,8 @@ class BingNewSpider(Spider):
         qlist = GetQuery().get_data()
         for query in qlist:
             if query:
-                self.start_urls.append(self.domain_url + '/news/search?q=' + urllib.quote(query.encode('utf8')) + sort_by_time)
+                query_url = '/news/search?q=' + urllib.quote(query.encode('utf8')) + sort_by_time
+                self.start_urls.append(self.domain_url + query_url)
     
     #一个回调函数中返回多个Request以及Item的例子
     def parse(self,response):

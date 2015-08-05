@@ -54,7 +54,8 @@ class BaiduNewSpider(Spider):
         for query in qlist:
             if query:
                 #默认时间排序
-                self.start_urls.append(self.domain_url+"/search?q="+urllib.quote(query.encode('utf8')) + tag)
+                query_url = "/search?q="+urllib.quote(query.encode('utf8')) + tag
+                self.start_urls.append(self.domain_url + query_url)
             
     #一个回调函数中返回多个Request以及Item的例子
     def parse(self,response):
@@ -121,6 +122,7 @@ class BaiduNewSpider(Spider):
                 item['pubtime'] = maindict['really_updated_at'][:-3]
                 if self.tool.old_news(item['pubtime']):
                     return
+                
                 item['content'] = []    
                 for content in content_list:
                     content = re.sub('<.*?>', '', content).replace('{','').replace('}', '')
