@@ -5,6 +5,7 @@ from scrapy import Request
 from scrapy.xlib.pydispatch import dispatcher
 from scrapy import signals
 from scrapy.selector import Selector
+from scrapy.exceptions import CloseSpider
 from scrapy import log
 from spiders.items import DataItem
 from spiders.tools import Utools
@@ -27,6 +28,7 @@ class BaiduNewSpider(Spider):
     tool = Utools()    
     dc = dataCleaner()
     start_urls = []
+    test_hbase = True
     
     def __init__ (self):
         super(BaiduNewSpider,self).__init__()
@@ -55,6 +57,15 @@ class BaiduNewSpider(Spider):
 
     #一个回调函数中返回多个Request以及Item的例子
     def parse(self,response):
+        # test the status of hbase and thrift server
+        if self.test_hbase:
+            try:
+                self.htable=HBaseTest(table = 'origin')
+                self.htable.close_trans()
+                self.test_hbase = False
+            except:
+                raise CloseSpider('no thrift or hbase server!')
+        
         #print '====start %s==' %response.url
         self.log('a response from %s just arrived!' %response.url)
         #抽取并解析新闻网页内容
