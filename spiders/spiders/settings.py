@@ -18,9 +18,9 @@ NEWSPIDER_MODULE = 'spiders.spiders'
 
 ITEM_PIPELINES = {
     'spiders.pipelines.TestSpiderPipeline': 300,
-    'spiders.pipelines.UrlsPipeline': 300,
+    'spiders.pipelines.UrlsPipeline': 350,
     'scrapy.contrib.downloadermiddleware.useragent.UserAgentMiddleware' : None,    
-    'spiders.UserAgentMiddleware.RotateUserAgentMiddleware':400
+    'spiders.UserAgentMiddleware.RotateUserAgentMiddleware':200
 } 
 
 #the max depth of the spider
@@ -38,6 +38,7 @@ DOWNLOAD_DELAY = 0.5#500MS OF DELAY
 COOKIES_ENABLED=False
 
 #日志信息
+LOG_ENABLED = True
 LOG_FILE='./spider.log'
 LOG_LEVEL='INFO'
 LOG_STDOUT=True
