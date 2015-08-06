@@ -14,7 +14,7 @@ class GetQuery():
                 host= 'localhost',
                 port = 3306,
                 user='scrm',
-                passwd='123@scrm',
+                passwd='123456',
                 db ='scrm',
                 tablename = 'subscribeinfo',
                 charset = 'utf8'):

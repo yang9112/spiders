@@ -5,11 +5,15 @@ from scrapy import Request
 from scrapy.xlib.pydispatch import dispatcher
 from scrapy import signals
 from scrapy.selector import Selector
+from scrapy.exceptions import CloseSpider
 from scrapy import log
 from spiders.items import DataItem
 from spiders.tools import Utools
 from spiders.query import GetQuery
+from spiders.dataCleaner import dataCleaner
+from spiders.hbaseClient import HBaseTest
 from bs4 import BeautifulSoup
+from redis import Redis
 import time
 import json,re
 import sys
@@ -23,6 +27,8 @@ class SogouWeixinSpider(Spider):
     domain_url = "http://weixin.sogou.com/weixin"
     start_urls = []
     tool = Utools()
+    dc = dataCleaner()
+    test_hbase = True
 
     def __init__ (self):
         super(SogouWeixinSpider,self).__init__()
@@ -33,6 +39,7 @@ class SogouWeixinSpider(Spider):
     def initial(self):
         self.log('---started----')
         self.getStartUrl()
+        self.r = Redis(host = self.tool.HOST_REDIS, port = 6379, db = 0)
 
     def finalize(self):
         self.log('---stopped---')
@@ -40,16 +47,31 @@ class SogouWeixinSpider(Spider):
 
     def getStartUrl(self):
         #从文件初始化查询关键词
-        #过去24小时以及过去1小时的关键词
-        #timeTag = '&time=0'
+        #过去24小时
+        timeTag = '&tsn=1'
         qlist = GetQuery().get_data()
-        for query in qlist:
-            if query:
-                self.start_urls.append(self.domain_url + '?type=2&query=' + urllib.quote(query.encode('utf8')))
         
+        for i in range(5):
+            for query in qlist:
+                if query:
+                    query_url = '?type=2&query=' + urllib.quote(query.encode('utf8')) + timeTag
+                    self.start_urls.append(self.domain_url + query_url)
+            
     #一个回调函数中返回多个Request以及Item的例子
     def parse(self,response):
-        #print '====start %s==' %response.url
+        # test the status of hbase and thrift server
+        if self.test_hbase:
+            try:
+                self.htable=HBaseTest(table = 'origin')
+                self.htable.close_trans()
+                self.test_hbase = False
+            except:
+                raise CloseSpider('no thrift or hbase server!')        
+        
+        print '====start %s==' %response.url        
+        time.sleep(4)
+        from scrapy.shell import inspect_response
+        inspect_response(response, self)
         #未成功获取query    
         if response.url == self.domain_url:
             print 'error of query'
@@ -70,13 +92,16 @@ class SogouWeixinSpider(Spider):
             
         #return requests
         for request in requests:
+            continue
             yield request
 
     def parse_content(self,response):
         item = response.meta['item']
         if response.body:
             bsoup = BeautifulSoup(response.body)
-        item['content'] = bsoup.select('div#page-content')[0].get_text()
+            
+        print 'url:' + item['url'] + ' is added'
+        item['content'] = str(bsoup.select('div#page-content')[0]).encode('utf8')
         return item
 
     def parse_items(self,response):
@@ -105,6 +130,9 @@ class SogouWeixinSpider(Spider):
                 item['pubtime'] = time.strftime('%Y-%m-%d %H:%M', time.localtime(float(elem.div['t'])))
                 if self.tool.old_news(item['pubtime']):
                         continue
+                if self.r.sismember('crawled_set', item['url']):
+                    #if self.htable.getRowByColumns(item['url'], ['indexData:url']):
+                    continue
                 
                 item['collecttime'] = time.strftime("%Y-%m-%d %H:%M", time.localtime())
                 item['abstract']=elem.p.get_text()

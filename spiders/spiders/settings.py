@@ -14,12 +14,15 @@ SPIDER_MODULES = ['spiders.spiders']
 NEWSPIDER_MODULE = 'spiders.spiders'
 
 # Crawl responsibly by identifying yourself (and your website) on the user-agent
-#USER_AGENT = 'Mozilla/5.0 (Windows NT 5.2) AppleWebKit/534.30 (KHTML, like Gecko) Chrome/12.0.742.122 Safari/534.30'
+USER_AGENT = 'Mozilla/5.0 (Windows NT 5.2) AppleWebKit/534.30 (KHTML, like Gecko) Chrome/12.0.742.122 Safari/534.30'
 
 ITEM_PIPELINES = {
     'spiders.pipelines.TestSpiderPipeline': 300,
     'spiders.pipelines.UrlsPipeline': 350,
-    'scrapy.contrib.downloadermiddleware.useragent.UserAgentMiddleware' : None,    
+}
+
+DOWNLOADER_MIDDLEWARES = {
+    'scrapy.contrib.downloadermiddleware.useragent.UserAgentMiddleware': None,
     'spiders.UserAgentMiddleware.RotateUserAgentMiddleware':200
 } 
 
