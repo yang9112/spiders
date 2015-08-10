@@ -6,7 +6,6 @@ from scrapy.xlib.pydispatch import dispatcher
 from scrapy import signals
 from scrapy.selector import Selector
 from scrapy.exceptions import CloseSpider
-from scrapy import log
 from spiders.items import DataItem
 from spiders.tools import Utools
 from spiders.query import GetQuery
@@ -73,7 +72,6 @@ class TianyaBBSSpider(Spider):
             except:
                 raise CloseSpider('no thrift or hbase server!')
         
-        self.log('a response from %s just arrived!' %response.url)
         #抽取并解析新闻网页内容
         items = self.parse_items(response)
         #构造一个Xpath的select对象，用来进行网页元素抽取
