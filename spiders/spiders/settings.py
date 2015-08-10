@@ -22,9 +22,11 @@ ITEM_PIPELINES = {
 }
 
 DOWNLOADER_MIDDLEWARES = {
-    'scrapy.contrib.downloadermiddleware.useragent.UserAgentMiddleware': None,
+    'scrapy.downloadermiddlewares.useragent.UserAgentMiddleware': None,
     'spiders.UserAgentMiddleware.RotateUserAgentMiddleware':200
 } 
+
+DOWNLOAD_HANDLERS = {'s3': None,}
 
 #the max depth of the spider
 DEPTH_LIMIT = 1
