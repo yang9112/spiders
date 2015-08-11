@@ -13,6 +13,8 @@ from spiders.dataCleaner import dataCleaner
 from spiders.hbaseClient import HBaseTest
 from bs4 import BeautifulSoup
 from redis import Redis
+import requests
+import random
 import time
 import json,re
 import sys
@@ -24,9 +26,13 @@ sys.setdefaultencoding('utf-8')
 class SogouWeixinSpider(Spider):
     name = "sogouwx"
     domain_url = "http://weixin.sogou.com/weixin"
+    UA = 'Mozilla/5.0 (Windows NT 5.2) AppleWebKit/534.30 (KHTML, like Gecko) Chrome/12.0.742.122 Safari/534.30'
     start_urls = []
     tool = Utools()
     dc = dataCleaner()
+    time_interval = 2
+    cookie = []
+    cookie_counter = 15
     test_hbase = True
 
     def __init__ (self):
@@ -50,14 +56,25 @@ class SogouWeixinSpider(Spider):
         timeTag = '&tsn=1'
         qlist = GetQuery().get_data()
         
-        for i in range(5):
-            for query in qlist:
-                if query:
-                    query_url = '?type=2&query=' + urllib.quote(query.encode('utf8')) + timeTag
-                    self.start_urls.append(self.domain_url + query_url)
-            
+        for query in qlist:
+            if query:
+                query_url = '?type=2&query=' + urllib.quote(query.encode('utf8')) + timeTag
+                self.start_urls.append(self.domain_url + query_url)
+                break
+    
+    def start_requests(self):
+        for i in range(self.cookie_counter):
+            time.sleep(self.time_interval + 3)
+            self.cookie.append(self.update_cookies())
+        
+        for i in range(len(self.start_urls)):
+            yield Request(self.start_urls[i], cookies=self.cookie[i%self.cookie_counter])
+        
     #一个回调函数中返回多个Request以及Item的例子
     def parse(self,response):
+        print '====start %s==' %response.url
+        time.sleep(self.time_interval)
+        
         # test the status of hbase and thrift server
         if self.test_hbase:
             try:
@@ -67,16 +84,11 @@ class SogouWeixinSpider(Spider):
             except:
                 raise CloseSpider('no thrift or hbase server!')        
         
-        print '====start %s==' %response.url        
-        time.sleep(4)
-        from scrapy.shell import inspect_response
-        inspect_response(response, self)
         #未成功获取query    
         if response.url == self.domain_url:
             print 'error of query'
             return
         
-        self.log('a response from %s just arrived!' %response.url)
         #抽取并解析新闻网页内容
         items = self.parse_items(response)
         #构造一个Xpath的select对象，用来进行网页元素抽取
@@ -88,8 +100,9 @@ class SogouWeixinSpider(Spider):
 
         for item in items:
             yield Request(url=item['url'], meta={'item': item}, callback=self.parse_content)
-            
-        #return requests
+            break
+        #return requestsf.cookie = self.update_cookies()
+            self.cookie_counter = self.cookie_coun
         for request in requests:
             continue
             yield request
@@ -137,3 +150,20 @@ class SogouWeixinSpider(Spider):
                 item['abstract']=elem.p.get_text()
                 items.append(item)
         return items
+    
+    def update_cookies(self):
+        s = requests.Session()
+        headers = {"User-Agent":self.UA}
+        s.headers.update(headers)
+        url = self.domain_url + ('?query=%s' % random.choice('abcdefghijklmnopqrstuvwxyz'))
+        r = s.get(url)
+        print r.url
+#        from scrapy.shell import inspect_response
+#        inspect_response(r, self)   
+        if 'SNUID' not in s.cookies:
+            p = re.compile(r'(?<=SNUID=)\w+')
+            s.cookies['SNUID'] = p.findall(r.text)[0]
+            suv = ''.join([str(int(time.time()*1000000) + random.randint(0, 1000))])
+            s.cookies['SUV'] = suv
+
+        return dict(s.cookies)
