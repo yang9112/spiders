@@ -177,7 +177,7 @@ class HBaseTest(object):
 
 def demo():
 #    columnFamilies=['indexData:','result:']
-    ht = HBaseTest(table='themes')
+    ht = HBaseTest(table='origin')
 #    item={}
 #    item['url']='http://article.pchome.net/content-1773855.html'
 #    

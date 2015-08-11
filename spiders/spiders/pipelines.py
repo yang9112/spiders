@@ -17,17 +17,32 @@ import threading
 reload(sys)
 sys.setdefaultencoding('utf-8')
 
+mutex=threading.Lock()
 class TestSpiderPipeline(object):
     def __init__(self):
+        self.items=[]
+        self.cachesize=20
         #事件绑定
         dispatcher.connect(self.initialize,signals.engine_started)
         dispatcher.connect(self.finalize,signals.engine_stopped)
+    
+    def writeToHbase(self):
+        if mutex.acquire(1):
+            for item in self.items:
+                try:
+                    self.htable.put_Item(item)
+                except:
+                    print 'url: '+ item['url'] + ' saved failed'
+                    continue
+            self.items=[]
+            mutex.release()
         
     def process_item(self, item, spider):
         #向hbase写数据
-#        if not item.get('title','not set')=='not set':
-#            print json.dumps(dict(item),ensure_ascii=False)
-        self.htable.put_Item(item)
+        if len(self.items) >= self.cachesize:
+            self.writeToHbase()
+        if item.get('url','not_exists')!='not_exists':
+            self.items.append(item)
         return item
 
     def initialize(self):
@@ -35,6 +50,13 @@ class TestSpiderPipeline(object):
 #        self.htable=HBaseTest(table = 'test')
 		
     def finalize(self):
+        if len(self.items) > 0:
+            for item in self.items:
+                try:
+                    self.htable.put_Item(item)
+                except:
+                    print 'url: '+ item['url'] + ' saved failed'
+                    continue
         self.htable.close_trans()
 
 class JsonWriterPipeline(object):
@@ -53,7 +75,6 @@ class JsonWriterPipeline(object):
 #            self.file1.write(line)
         return item
         
-mutex=threading.Lock()
 class UrlsPipeline(object):
     def __init__(self):
         self.urls=[]

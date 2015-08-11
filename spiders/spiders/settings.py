@@ -42,6 +42,9 @@ DOWNLOAD_DELAY = 0.5#500MS OF DELAY
 #禁用cookies
 COOKIES_ENABLED=False
 
+#禁止重试
+RETRY_ENABLED = False
+
 #日志信息
 LOG_ENABLED = True
 LOG_FILE='./spider.log'
