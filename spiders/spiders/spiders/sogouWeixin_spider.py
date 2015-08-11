@@ -26,13 +26,13 @@ sys.setdefaultencoding('utf-8')
 class SogouWeixinSpider(Spider):
     name = "sogouwx"
     domain_url = "http://weixin.sogou.com/weixin"
-    UA = 'Mozilla/5.0 (Windows NT 5.2) AppleWebKit/534.30 (KHTML, like Gecko) Chrome/12.0.742.122 Safari/534.30'
+    UA = 'Mozilla/5.0 (X11; Linux x86_64; rv:38.0) Gecko/20100101 Firefox/38.0'
     start_urls = []
     tool = Utools()
     dc = dataCleaner()
-    time_interval = 2
+    time_interval = 4
     cookie = []
-    cookie_counter = 15
+    cookie_counter = 10
     test_hbase = True
 
     def __init__ (self):
@@ -60,20 +60,33 @@ class SogouWeixinSpider(Spider):
             if query:
                 query_url = '?type=2&query=' + urllib.quote(query.encode('utf8')) + timeTag
                 self.start_urls.append(self.domain_url + query_url)
-                break
     
     def start_requests(self):
+        SNUID = [
+            '064EC75C848699832B731CF284E60AF0',
+            'F1BE37AC73766885988E3240741383AD',
+            '662EA63CE2E6FEE353394909E369D69E',
+            '0E41C8548C8E968D394A80C18CB76996',
+            '8FC64FD40A0F170AB33A995B0B7E711C',
+            '5619970CD4D6CED6F1AE45D0D4D34938',
+            'FBB23AA07F7A627D54DF70947F045FC1',
+            'D79F158D51574F507C67CABE521BD716',
+            '49008913CCC9D0CFE3287443CD2F631E',
+            '3870F961BEB8A0BC8C0AC1A6BED41912'
+        ]
+        
         for i in range(self.cookie_counter):
-            time.sleep(self.time_interval + 3)
             self.cookie.append(self.update_cookies())
         
         for i in range(len(self.start_urls)):
+            self.cookie[i%self.cookie_counter]['SNUID'] = SNUID[i%self.cookie_counter]
             yield Request(self.start_urls[i], cookies=self.cookie[i%self.cookie_counter])
         
     #一个回调函数中返回多个Request以及Item的例子
-    def parse(self,response):
+    def parse(self,response):      
         print '====start %s==' %response.url
-        time.sleep(self.time_interval)
+        #print response.body
+        time.sleep(random.randint(2, self.time_interval))
         
         # test the status of hbase and thrift server
         if self.test_hbase:
@@ -156,8 +169,10 @@ class SogouWeixinSpider(Spider):
         headers = {"User-Agent":self.UA}
         s.headers.update(headers)
         url = self.domain_url + ('?query=%s' % random.choice('abcdefghijklmnopqrstuvwxyz'))
+        #url = 'http://ip.cn'
+    
         r = s.get(url)
-        print r.url
+        
 #        from scrapy.shell import inspect_response
 #        inspect_response(r, self)   
         if 'SNUID' not in s.cookies:
@@ -165,5 +180,5 @@ class SogouWeixinSpider(Spider):
             s.cookies['SNUID'] = p.findall(r.text)[0]
             suv = ''.join([str(int(time.time()*1000000) + random.randint(0, 1000))])
             s.cookies['SUV'] = suv
-
+        
         return dict(s.cookies)
