@@ -54,8 +54,7 @@ class SogouWeixinSpider(Spider):
         #过去24小时
         timeTag = '&tsn=1'
         qlist = GetQuery().get_data()
-        
-        qlist = ['信用']
+
         for query in qlist:
             if query:
                 query_url = '?type=2&query=' + urllib.quote(query.encode('utf8')) + timeTag
@@ -111,7 +110,7 @@ class SogouWeixinSpider(Spider):
             bsoup = BeautifulSoup(res, from_encoding='utf8')
         
             try:
-                item['content'] = str(bsoup.select('div#page-content')[0]).encode('utf8')
+                item['content'] = str(bsoup.select('div#js_content')[0]).encode('utf8')
                 print 'url:' + item['url'] + ' is added'
                 return item
             except:
