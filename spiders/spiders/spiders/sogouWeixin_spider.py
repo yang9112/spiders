@@ -30,7 +30,7 @@ class SogouWeixinSpider(Spider):
     start_urls = []
     tool = Utools()
     dc = dataCleaner()
-    time_interval = 4
+    time_interval = 1
     cookie = []
     cookie_counter = 10
     test_hbase = True
@@ -62,31 +62,30 @@ class SogouWeixinSpider(Spider):
                 self.start_urls.append(self.domain_url + query_url)
     
     def start_requests(self):
-        SNUID = [
-            '064EC75C848699832B731CF284E60AF0',
-            'F1BE37AC73766885988E3240741383AD',
-            '662EA63CE2E6FEE353394909E369D69E',
-            '0E41C8548C8E968D394A80C18CB76996',
-            '8FC64FD40A0F170AB33A995B0B7E711C',
-            '5619970CD4D6CED6F1AE45D0D4D34938',
-            'FBB23AA07F7A627D54DF70947F045FC1',
-            'D79F158D51574F507C67CABE521BD716',
-            '49008913CCC9D0CFE3287443CD2F631E',
-            '3870F961BEB8A0BC8C0AC1A6BED41912'
-        ]
-        
-        for i in range(self.cookie_counter):
-            self.cookie.append(self.update_cookies())
-        
+#        SNUID = [
+#            '662EA03CE3E6F9E2F79CDF28E445231E',
+#            'FAB33BA07E7B627BCEA0BEEC7F07B2E1',
+#            'C78F069D41445C44584060F04250F163',
+#            'ACE46DF7282D342E358064942968E2C5',
+#            '8FC74ED5090F170C29267F080A29F749',
+#            '4F078E14CACED7CDEEAA2A2FCBB0150B',
+#            'A6E967FB23263922032B3A0624F653AF',
+#            'D49C148E50554D5779CB76F3512DD18D',
+#            '85CD44DF2208990A0000000055C9C7A7',
+#            '86CE47DB04061E022D84C6EC04141994',
+#            'E0A921BA646079635473BC9A6501B530',
+#            'A2EA63F827223B2117F2B643276BFD14',
+#            '2961E873ABA9B1AA98876871ACD9F7B4',
+#        ]
+                
         for i in range(len(self.start_urls)):
-            self.cookie[i%self.cookie_counter]['SNUID'] = SNUID[i%self.cookie_counter]
-            yield Request(self.start_urls[i], cookies=self.cookie[i%self.cookie_counter])
+            yield Request(self.start_urls[i], cookies=self.update_cookies())
         
     #一个回调函数中返回多个Request以及Item的例子
     def parse(self,response):      
         print '====start %s==' %response.url
         #print response.body
-        time.sleep(random.randint(2, self.time_interval))
+        time.sleep(random.randint(self.time_interval, 2))
         
         # test the status of hbase and thrift server
         if self.test_hbase:
@@ -113,9 +112,7 @@ class SogouWeixinSpider(Spider):
 
         for item in items:
             yield Request(url=item['url'], meta={'item': item}, callback=self.parse_content)
-            break
-        #return requestsf.cookie = self.update_cookies()
-            self.cookie_counter = self.cookie_coun
+
         for request in requests:
             continue
             yield request
@@ -123,10 +120,10 @@ class SogouWeixinSpider(Spider):
     def parse_content(self,response):
         item = response.meta['item']
         if response.body:
-            bsoup = BeautifulSoup(response.body)
+            bsoup = BeautifulSoup(response.body, from_encoding='utf8')
             
-        print 'url:' + item['url'] + ' is added'
         item['content'] = str(bsoup.select('div#page-content')[0]).encode('utf8')
+        print 'url:' + item['url'] + ' is added'
         return item
 
     def parse_items(self,response):
@@ -154,7 +151,7 @@ class SogouWeixinSpider(Spider):
                 #时间戳转换时间
                 item['pubtime'] = time.strftime('%Y-%m-%d %H:%M', time.localtime(float(elem.div['t'])))
                 if self.tool.old_news(item['pubtime']):
-                        continue
+                    continue
                 if self.r.sismember('crawled_set', item['url']):
                     #if self.htable.getRowByColumns(item['url'], ['indexData:url']):
                     continue
@@ -166,19 +163,14 @@ class SogouWeixinSpider(Spider):
     
     def update_cookies(self):
         s = requests.Session()
-        headers = {"User-Agent":self.UA}
-        s.headers.update(headers)
-        url = self.domain_url + ('?query=%s' % random.choice('abcdefghijklmnopqrstuvwxyz'))
-        #url = 'http://ip.cn'
-    
-        r = s.get(url)
-        
-#        from scrapy.shell import inspect_response
-#        inspect_response(r, self)   
-        if 'SNUID' not in s.cookies:
-            p = re.compile(r'(?<=SNUID=)\w+')
-            s.cookies['SNUID'] = p.findall(r.text)[0]
-            suv = ''.join([str(int(time.time()*1000000) + random.randint(0, 1000))])
-            s.cookies['SUV'] = suv
+        s.headers = {"User-Agent":self.UA}
+
+        r = s.post('http://weixin.sogou.com/antispider/thank.php')
+        pcontent = re.search("setCookie\('SNUID'.*?\)", r.content).group(0)
+        SNUID = eval(pcontent.split(',')[1])
+         
+        suv = ''.join([str(int(time.time()*1000000) + random.randint(0, 1000))])
+        s.cookies['SUV'] = suv
+        s.cookies['SNUID'] = SNUID
         
         return dict(s.cookies)
