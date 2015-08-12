@@ -30,9 +30,8 @@ class SogouWeixinSpider(Spider):
     start_urls = []
     tool = Utools()
     dc = dataCleaner()
-    time_interval = 1
+    time_interval = 0
     cookie = []
-    cookie_counter = 10
     test_hbase = True
 
     def __init__ (self):
@@ -61,25 +60,11 @@ class SogouWeixinSpider(Spider):
                 query_url = '?type=2&query=' + urllib.quote(query.encode('utf8')) + timeTag
                 self.start_urls.append(self.domain_url + query_url)
     
-    def start_requests(self):
-#        SNUID = [
-#            '662EA03CE3E6F9E2F79CDF28E445231E',
-#            'FAB33BA07E7B627BCEA0BEEC7F07B2E1',
-#            'C78F069D41445C44584060F04250F163',
-#            'ACE46DF7282D342E358064942968E2C5',
-#            '8FC74ED5090F170C29267F080A29F749',
-#            '4F078E14CACED7CDEEAA2A2FCBB0150B',
-#            'A6E967FB23263922032B3A0624F653AF',
-#            'D49C148E50554D5779CB76F3512DD18D',
-#            '85CD44DF2208990A0000000055C9C7A7',
-#            '86CE47DB04061E022D84C6EC04141994',
-#            'E0A921BA646079635473BC9A6501B530',
-#            'A2EA63F827223B2117F2B643276BFD14',
-#            '2961E873ABA9B1AA98876871ACD9F7B4',
-#        ]
-                
+    def start_requests(self):                
         for i in range(len(self.start_urls)):
-            yield Request(self.start_urls[i], cookies=self.update_cookies())
+            if i%5 == 0:
+                self.cookie = self.update_cookies()
+            yield Request(self.start_urls[i], cookies=self.cookie)
         
     #一个回调函数中返回多个Request以及Item的例子
     def parse(self,response):      
