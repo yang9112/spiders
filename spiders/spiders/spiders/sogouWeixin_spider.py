@@ -121,11 +121,15 @@ class SogouWeixinSpider(Spider):
         item = response.meta['item']
         if response.body:
             bsoup = BeautifulSoup(response.body, from_encoding='utf8')
+        
+        try:
+            item['content'] = str(bsoup.select('div#page-content')[0]).encode('utf8')
+            print 'url:' + item['url'] + ' is added'
+            return item
+        except:
+            print 'url:' + item['url'] + ' load failed'
+            return
             
-        item['content'] = str(bsoup.select('div#page-content')[0]).encode('utf8')
-        print 'url:' + item['url'] + ' is added'
-        return item
-
     def parse_items(self,response):
         if response.body:
             #去除干扰内容<!.*?>
