@@ -55,6 +55,7 @@ class SogouWeixinSpider(Spider):
         timeTag = '&tsn=1'
         qlist = GetQuery().get_data()
         
+        qlist = ['信用']
         for query in qlist:
             if query:
                 query_url = '?type=2&query=' + urllib.quote(query.encode('utf8')) + timeTag
@@ -105,15 +106,16 @@ class SogouWeixinSpider(Spider):
     def parse_content(self,response):
         item = response.meta['item']
         if response.body:
-            bsoup = BeautifulSoup(response.body, from_encoding='utf8')
+            response.body = re.sub('\n|\r|\t', '', response.body)
+            res = re.sub('<script.*?</script>', '', response.body)
+            bsoup = BeautifulSoup(res, from_encoding='utf8')
         
-        try:
-            item['content'] = str(bsoup.select('div#page-content')[0]).encode('utf8')
-            print 'url:' + item['url'] + ' is added'
-            return item
-        except:
-            print 'url:' + item['url'] + ' load failed'
-            return
+            try:
+                item['content'] = str(bsoup.select('div#page-content')[0]).encode('utf8')
+                print 'url:' + item['url'] + ' is added'
+                return item
+            except:
+                print 'url:' + item['url'] + ' load failed'
             
     def parse_items(self,response):
         if response.body:
