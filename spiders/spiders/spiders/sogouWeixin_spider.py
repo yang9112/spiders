@@ -105,8 +105,8 @@ class SogouWeixinSpider(Spider):
     def parse_content(self,response):
         item = response.meta['item']
         if response.body:
-            response.body = re.sub('\n|\r|\t', '', response.body)
-            res = re.sub('<script.*?</script>', '', response.body)
+            res = re.sub('\n|\r|\t', '', response.body)
+            res = re.sub('<script.*?</script>', '', res)
             bsoup = BeautifulSoup(res, from_encoding='utf8')
         
             try:
