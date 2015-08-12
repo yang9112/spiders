@@ -28,7 +28,7 @@ class BaiduNewSpider(Spider):
     dc = dataCleaner()
     start_urls = []
     test_hbase = True
-    
+ 
     def __init__ (self):
         super(BaiduNewSpider,self).__init__()
         #将final绑定到爬虫结束的事件上

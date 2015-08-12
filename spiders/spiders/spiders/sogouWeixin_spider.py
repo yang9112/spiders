@@ -33,13 +33,18 @@ class SogouWeixinSpider(Spider):
     time_interval = 0
     cookie = []
     test_hbase = True
+    
+    custom_settings = {
+        "DOWNLOAD_DELAY": 0.2,
+        "COOKIES_ENABLED": True,
+    }
 
     def __init__ (self):
         super(SogouWeixinSpider,self).__init__()
         #将final绑定到爬虫结束的事件上
         dispatcher.connect(self.initial,signals.engine_started)
         dispatcher.connect(self.finalize,signals.engine_stopped)
-    
+
     def initial(self):
         self.log('---started----')
         self.getStartUrl()

@@ -27,7 +27,7 @@ class TianyaBBSSpider(Spider):
     tool = Utools()    
     dc = dataCleaner()
     start_urls = []
-    test_hbase = True    
+    test_hbase = True   
     
     def __init__ (self):
         super(TianyaBBSSpider,self).__init__()
