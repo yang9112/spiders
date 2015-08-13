@@ -53,7 +53,7 @@ class BaiduNewSpider(Spider):
                 #默认时间排序
                 query_url = "/ns?rn=20&word=" + urllib.quote(query.encode('utf8')) + '&ct=0'
                 self.start_urls.append(self.domain_url + query_url)
-sort_by_time
+
     #一个回调函数中返回多个Request以及Item的例子
     def parse(self,response):
         # test the status of hbase and thrift server
@@ -101,7 +101,7 @@ sort_by_time
             item['content'] = self.dc.process(str(bsoup))
             if item['content']:
                 print 'url: ' + item['url'] + ' is added'
-                return itemsort_by_time
+                return item
 
     def parse_items(self,response):
         if response.body:
@@ -172,7 +172,7 @@ sort_by_time
             if time_text.find('天'.encode('utf8')) > 0:
                 interval = 86400
             elif time_text.find('时'.encode('utf8')) > 0:
-                interval = 3600
+                interval = 3600.
             elif time_text.find('分'.encode('utf8')) > 0:
                 interval = 60
             elif time_text.find('秒'.encode('utf8')) > 0:
