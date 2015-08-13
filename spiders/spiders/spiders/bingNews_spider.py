@@ -49,7 +49,8 @@ class BingNewSpider(Spider):
 
     def getStartUrl(self):
         #从文件初始化查询关键词
-        sort_by_time = '&qft=sortbydate%3d"1"'
+        #sort_by_time = '&qft=sortbydate%3d"1"'
+        sort_by_time = ''
         qlist = GetQuery().get_data()
         for query in qlist:
             if query:
@@ -141,6 +142,12 @@ class BingNewSpider(Spider):
                 if self.r.sismember('crawled_set', item['url']): 
                     #if self.htable.getRowByColumns(item['url'], ['indexData:url']):
                     continue
+                
+                try:                
+                    item['source'] = item['medianame']
+                    item['medianame'] = ''
+                except:
+                    pass
                 
                 item['collecttime'] = time.strftime("%Y-%m-%d %H:%M", time.localtime())
                 if elem.find('span',class_='sn_snip'):
