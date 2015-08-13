@@ -46,14 +46,14 @@ class BaiduNewSpider(Spider):
         #url持久化
 
     def getStartUrl(self):
-        #从文件初始化查询关键词.
+        #从文件初始化查询关键词
         qlist = GetQuery().get_data()
         for query in qlist:
             if query:
                 #默认时间排序
                 query_url = "/ns?rn=20&word=" + urllib.quote(query.encode('utf8')) + '&ct=0'
                 self.start_urls.append(self.domain_url + query_url)
-
+sort_by_time
     #一个回调函数中返回多个Request以及Item的例子
     def parse(self,response):
         # test the status of hbase and thrift server
@@ -90,7 +90,7 @@ class BaiduNewSpider(Spider):
     def parse_content(self,response):
         item = response.meta['item']
 
-        if item['url'].find('?') >= 0:.
+        if item['url'].find('?') >= 0:
             item['url'] = response.url
             if self.r.sismember('crawled_set', item['url']):
                 #if self.htable.getRowByColumns(item['url'], ['indexData:url']):
@@ -101,7 +101,7 @@ class BaiduNewSpider(Spider):
             item['content'] = self.dc.process(str(bsoup))
             if item['content']:
                 print 'url: ' + item['url'] + ' is added'
-                return item
+                return itemsort_by_time
 
     def parse_items(self,response):
         if response.body:
@@ -128,7 +128,7 @@ class BaiduNewSpider(Spider):
                 
                 author = elem.find('p',class_='c-author')
                 if author:
-                    source_time = author.get_text().split.()
+                    source_time = author.get_text().split()
                     if re.match(r'\d{4}.*?\d{1,2}.*?\d{1,2}', source_time[0].encode('utf8')):
                         item['medianame'] = 'None'
                         item['pubtime'] = self.normalize_time(str(' '.join(source_time)))
@@ -172,7 +172,7 @@ class BaiduNewSpider(Spider):
             if time_text.find('天'.encode('utf8')) > 0:
                 interval = 86400
             elif time_text.find('时'.encode('utf8')) > 0:
-                interval = 3600.
+                interval = 3600
             elif time_text.find('分'.encode('utf8')) > 0:
                 interval = 60
             elif time_text.find('秒'.encode('utf8')) > 0:
