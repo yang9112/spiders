@@ -148,8 +148,8 @@ class BaiduNewSpider(Spider):
                     #if self.htable.getRowByColumns(item['url'], ['indexData:url']):
                     continue
 
-                try:                
-                    item['source'] = item['medianame']
+                try:
+                    item['source'] = self.tool.get_realname(item['medianame'])
                     item['medianame'] = ''
                 except:
                     pass

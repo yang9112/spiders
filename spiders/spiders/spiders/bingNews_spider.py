@@ -144,7 +144,7 @@ class BingNewSpider(Spider):
                     continue
                 
                 try:                
-                    item['source'] = item['medianame']
+                    item['source'] = self.tool.get_realname(item['medianame'])
                     item['medianame'] = ''
                 except:
                     pass

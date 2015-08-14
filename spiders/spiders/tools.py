@@ -27,6 +27,17 @@ class Utools():
     
     def set_timeinterval(self, new_interval):
         self.time_interval = new_interval
+    
+    def get_realname(self, string_name):
+        namedict = {
+            'news.cz001.com.cn':'中国常州网',
+            'nj.house.ifeng.com':'凤凰房产',
+        }
+        
+        if string_name in namedict:
+            return namedict[string_name]
+            
+        return string_name
 
 if __name__ == '__main__':
     ut = Utools()
