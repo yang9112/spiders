@@ -150,7 +150,7 @@ class BaiduNewSpider(Spider):
 
                 try:
                     item['source'] = self.tool.get_realname(item['medianame'])
-                    item['medianame'] = ''
+                    item['medianame'] = ' '
                 except:
                     pass
             
