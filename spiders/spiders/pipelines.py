@@ -79,6 +79,13 @@ class UrlsPipeline(object):
     def __init__(self):
         self.urls=[]
         self.cachesize=20
+        self.expire_time = 3600*24*7
+        try:
+            self.redis_write = redis.Redis(host='10.133.5.203', port=6379, db=3)
+            self.redis_read = redis.Redis(host='10.133.16.91', port=6380, db=3)
+        except:
+            print 'connect failed'
+            pass
         
         try:
             try:
@@ -99,6 +106,11 @@ class UrlsPipeline(object):
             pipe=self.client.pipeline()
             for url in self.urls:
                 pipe.rpush('linkbase',url.encode('utf8'))
+                
+                key = url.encode('utf8')
+                if not self.redis_read.exists(key):
+                    self.redis_write.set(key, key, self.expire_time)
+                    
             pipe.execute()
 
     def writeToRedis(self):
@@ -106,6 +118,11 @@ class UrlsPipeline(object):
             pipe=self.client.pipeline()
             for url in self.urls:
                 pipe.rpush('linkbase',url.encode('utf8'))
+                
+                key = url.encode('utf8')
+                if not self.redis_read.exists(key):
+                    self.redis_write.set(key, key, self.expire_time)
+
             pipe.execute()
             self.urls=[]
             mutex.release()
