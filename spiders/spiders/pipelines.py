@@ -31,6 +31,7 @@ class TestSpiderPipeline(object):
             for item in self.items:
                 try:
                     self.htable.put_Item(item)
+                    self.htable1.put_Item(item)
                 except:
                     print 'url: '+ item['url'] + ' saved failed'
                     continue
@@ -47,6 +48,7 @@ class TestSpiderPipeline(object):
 
     def initialize(self):
         self.htable=HBaseTest(table = 'origin')
+        self.htable1=HBaseTest(host = '10.133.16.85', table = 'origin')
 #        self.htable=HBaseTest(table = 'test')
 		
     def finalize(self):
@@ -54,10 +56,12 @@ class TestSpiderPipeline(object):
             for item in self.items:
                 try:
                     self.htable.put_Item(item)
+                    self.htable1.put_Item(item)
                 except:
                     print 'url: '+ item['url'] + ' saved failed'
                     continue
         self.htable.close_trans()
+        self.htable1.close_trans()
 
 class JsonWriterPipeline(object):
     def __init__(self):

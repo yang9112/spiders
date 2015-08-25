@@ -28,12 +28,12 @@ def decode(s):
 
 class HBaseTest(object):
     def __init__(self, table='test', columnFamilies=['indexData:','result'],host = 'localhost', port=9090):
-
-        try:
-            host = Utools().HOST_HBASE
-        except:
-            print 'use the default host(hbase):"localhost"'
-            host = 'localhost'
+        if host == 'localhost':
+            try:
+                host = Utools().HOST_HBASE
+            except:
+                print 'use the default host(hbase):"localhost"'
+                host = 'localhost'
 
         self.table = table
         self.port = port
