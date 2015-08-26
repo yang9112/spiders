@@ -65,7 +65,7 @@ class BaiduNewSpider(Spider):
             except:
                 raise CloseSpider('no thrift or hbase server!')
         
-        print '====start %s==' %response.url
+        #print '====start %s==' %response.url
         
         #抽取并解析新闻网页内容
         items = self.parse_items(response)

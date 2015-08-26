@@ -39,7 +39,9 @@ class HBaseTest(object):
         self.port = port
 
         # Connect to HBase Thrift server
-        self.transport = TTransport.TBufferedTransport(TSocket.TSocket(host, port))
+        socket = TSocket.TSocket(host, port)
+        socket.setTimeout(1000*10)
+        self.transport = TTransport.TBufferedTransport(socket)
         self.protocol = TBinaryProtocol.TBinaryProtocol(self.transport)
         
         # Create and open the client connection
@@ -177,7 +179,7 @@ class HBaseTest(object):
 
 def demo():
 #    columnFamilies=['indexData:','result:']
-    ht = HBaseTest(table='origin')
+    ht = HBaseTest(host='10.133.16.85', table='origin')
 #    item={}
 #    item['url']='http://article.pchome.net/content-1773855.html'
 #    

@@ -21,7 +21,7 @@ mutex=threading.Lock()
 class TestSpiderPipeline(object):
     def __init__(self):
         self.items=[]
-        self.cachesize=20
+        self.cachesize=50
         #事件绑定
         dispatcher.connect(self.initialize,signals.engine_started)
         dispatcher.connect(self.finalize,signals.engine_stopped)
