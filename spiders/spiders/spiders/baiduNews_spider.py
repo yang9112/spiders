@@ -89,6 +89,12 @@ class BaiduNewSpider(Spider):
 
     def parse_content(self,response):
         item = response.meta['item']
+        charset = 'utf-8'
+        for meta_item in response.xpath('//meta[@http-equiv]').extract():
+            is_exsit = re.match('charset=(.*?)"', meta_item)
+            if is_exsit:
+                charset = is_exsit.group(0)
+                break
 
         if item['url'].find('?') >= 0:
             item['url'] = response.url
@@ -97,8 +103,13 @@ class BaiduNewSpider(Spider):
                 return                         
         
         if response.body:
-            bsoup = BeautifulSoup(response.body,from_encoding='utf-8')
+            try:
+                bsoup = BeautifulSoup(response.body, from_encoding=charset)
+            except:
+                bsoup = BeautifulSoup(response.body, from_encoding='utf-8')
             item['content'] = self.dc.process(str(bsoup))
+            if len(item['content'].encode('utf8')) < len(item['abstract']):
+                item['content'] = item['abstract'].replace('百度快照', '')
             if item['content']:
                 print 'url: ' + item['url'] + ' is added'
                 return item

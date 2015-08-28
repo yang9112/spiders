@@ -97,7 +97,7 @@ class dataCleaner():
                 content = content.replace(minicontent, '')
                 minicontent = clearmatch.sub('', minicontent)
                 minicontent = self.wfromtback(minicontent)
-                if len(clearmatch2.sub('', minicontent)) > len(maxcontent):
+                if len(clearmatch2.sub('', minicontent).replace(' ','')) > len(maxcontent):
                     maxcontent = minicontent
         
         maxcontent = maxcontent.replace('&aleft;', '').replace('&aright;', '')
