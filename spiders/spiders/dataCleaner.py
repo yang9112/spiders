@@ -24,6 +24,9 @@ class dataCleaner():
 
     def delscript(self, content):
         return re.sub(r'<script.*?</script>', '', content)
+        
+    def deltextarea(self, content):
+        return re.sub(r'<textarea.*?</textarea>', '', content)
     
     def delul(self, content):
         content = re.sub(r'<ul .*?</ul>', '', content)
@@ -110,6 +113,7 @@ class dataCleaner():
                 f = f.replace(label, '')
             
             f = self.delscript(f)
+            f = self.deltextarea(f)
             f = self.delul(f)
             f = self.defli(f)
             
