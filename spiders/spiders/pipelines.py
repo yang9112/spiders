@@ -86,7 +86,7 @@ class UrlsPipeline(object):
         self.expire_time = 3600*24*7
         try:
             self.redis_write = redis.Redis(host='10.254.3.119', port=6379, db=3)
-            self.redis_read = redis.Redis(host='10.254.3.119', port=6380, db=3)
+            self.redis_read = redis.Redis(host='10.254.3.119', port=6379, db=3)
         except:
             print 'connect failed'
             pass
