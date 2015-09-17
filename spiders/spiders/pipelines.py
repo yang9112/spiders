@@ -85,8 +85,8 @@ class UrlsPipeline(object):
         self.cachesize=20
         self.expire_time = 3600*24*7
         try:
-            self.redis_write = redis.Redis(host='10.254.3.119', port=6379, db=3)
-            self.redis_read = redis.Redis(host='10.254.3.119', port=6379, db=3)
+            self.redis_db3 = redis.Redis(host='10.254.3.119', port=6379, db=3)
+            self.redis_db0 = redis.Redis(host='10.254.3.119', port=6379, db=0)
         except:
             print 'connect failed'
             pass
@@ -110,10 +110,11 @@ class UrlsPipeline(object):
             pipe=self.client.pipeline()
             for url in self.urls:
                 pipe.rpush('linkbase',url.encode('utf8'))
+                self.redis_db0.rpush('linkbase', url.encode('utf8'))
                 
                 key = url.encode('utf8')
-                if not self.redis_read.exists(key):
-                    self.redis_write.set(key, key, self.expire_time)
+                if not self.redis_db3.exists(key):
+                    self.redis_db3.set(key, key, self.expire_time)
                     
             pipe.execute()
 
@@ -122,10 +123,11 @@ class UrlsPipeline(object):
             pipe=self.client.pipeline()
             for url in self.urls:
                 pipe.rpush('linkbase',url.encode('utf8'))
-                
+                self.redis_db0.rpush('linkbase', url.encode('utf8'))
+                                
                 key = url.encode('utf8')
-                if not self.redis_read.exists(key):
-                    self.redis_write.set(key, key, self.expire_time)
+                if not self.redis_db3.exists(key):
+                    self.redis_db3.set(key, key, self.expire_time)
 
             pipe.execute()
             self.urls=[]
