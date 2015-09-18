@@ -82,11 +82,12 @@ class JsonWriterPipeline(object):
 class UrlsPipeline(object):
     def __init__(self):
         self.urls=[]
+        self.redis_timeout = False
         self.cachesize=20
         self.expire_time = 3600*24*7
         try:
-            self.redis_db3 = redis.Redis(host='10.254.3.119', port=6379, db=3)
-            self.redis_db0 = redis.Redis(host='10.254.3.119', port=6379, db=0)
+            self.redis_db3 = redis.Redis(host='10.254.3.119', port=6379, db=3, socket_timeout=1)
+            self.redis_db0 = redis.Redis(host='10.254.3.119', port=6379, db=0, socket_timeout=1)
         except:
             print 'connect failed'
             pass
@@ -110,25 +111,40 @@ class UrlsPipeline(object):
             pipe=self.client.pipeline()
             for url in self.urls:
                 pipe.rpush('linkbase',url.encode('utf8'))
-                self.redis_db0.rpush('linkbase', url.encode('utf8'))
                 
-                key = url.encode('utf8')
-                if not self.redis_db3.exists(key):
-                    self.redis_db3.set(key, key, self.expire_time)
-                    
+                if not self.redis_timeout:
+                    try:
+                        self.redis_db0.rpush('linkbase', url.encode('utf8'))
+                        
+                        key = url.encode('utf8')
+                        if not self.redis_db3.exists(key):
+                            self.redis_db3.set(key, key, self.expire_time)
+                    except:
+                        print "redis timeout error"
+                        self.redis_timeout = True
+            
+            self.redis_timeout = False
             pipe.execute()
 
     def writeToRedis(self):
         if mutex.acquire(1):
             pipe=self.client.pipeline()
+
             for url in self.urls:
                 pipe.rpush('linkbase',url.encode('utf8'))
-                self.redis_db0.rpush('linkbase', url.encode('utf8'))
-                                
-                key = url.encode('utf8')
-                if not self.redis_db3.exists(key):
-                    self.redis_db3.set(key, key, self.expire_time)
 
+                if not self.redis_timeout:
+                    try:
+                        self.redis_db0.rpush('linkbase', url.encode('utf8'))
+                                        
+                        key = url.encode('utf8')
+                        if not self.redis_db3.exists(key):
+                            self.redis_db3.set(key, key, self.expire_time)
+                    except:
+                        print "redis timeout error"
+                        self.redis_timeout = True
+
+            self.redis_timeout = False
             pipe.execute()
             self.urls=[]
             mutex.release()
