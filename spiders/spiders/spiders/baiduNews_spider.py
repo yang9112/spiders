@@ -99,7 +99,6 @@ class BaiduNewSpider(Spider):
         if item['url'].find('?') >= 0:
             item['url'] = response.url
             if self.r.sismember('crawled_set', item['url']):
-                #if self.htable.getRowByColumns(item['url'], ['indexData:url']):
                 return                         
         
         if response.body:
