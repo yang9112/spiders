@@ -103,6 +103,8 @@ class BaiduNewSpider(Spider):
                 return                         
         
         if response.body:
+            response.body = re.sub("\n|\r|\t", "", response.body)
+            response.body = re.sub("<!--.*?-->", "", response.body)
             try:
                 bsoup = BeautifulSoup(response.body, from_encoding=charset)
             except:
