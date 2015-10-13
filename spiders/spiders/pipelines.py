@@ -86,8 +86,8 @@ class UrlsPipeline(object):
         self.cachesize=20
         self.expire_time = 3600*24*7
         try:
-            self.redis_db3 = redis.Redis(host='10.128.3.119', port=6379, db=3, socket_timeout=1)
-            self.redis_db0 = redis.Redis(host='10.128.3.119', port=6379, db=0, socket_timeout=1)
+            self.redis_db3 = redis.Redis(host='10.128.3.116', port=6379, db=3, socket_timeout=1)
+            self.redis_db0 = redis.Redis(host='10.128.3.116', port=6379, db=0, socket_timeout=1)
         except:
             print 'connect failed'
             pass
