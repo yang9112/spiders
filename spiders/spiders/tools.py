@@ -8,8 +8,9 @@ class Utools():
     HOST_SQL = 'localhost'
     HOST_REDIS = 'localhost'
     HOST_HBASE = '10.133.5.49'
-    HOST_SQL = '10.133.5.203'
+    HOST_SQL = '10.128.3.114'
     HOST_REDIS = '10.133.5.48'
+    HOST_REDIS1 = "10.128.3.116"
 
     #second
     time_interval = 3600*24

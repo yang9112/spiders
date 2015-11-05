@@ -48,7 +48,7 @@ class SogouWeixinSpider(Spider):
     def initial(self):
         self.log('---started----')
         self.getStartUrl()
-        self.r = Redis(host = self.tool.HOST_REDIS, port = 6379, db = 0)
+        self.r = Redis(host = self.tool.HOST_REDIS1, port = 6379, db = 3)
 
     def finalize(self):
         self.log('---stopped---')
@@ -147,7 +147,7 @@ class SogouWeixinSpider(Spider):
                 item['pubtime'] = time.strftime('%Y-%m-%d %H:%M', time.localtime(float(elem.div['t'])))
                 if self.tool.old_news(item['pubtime']):
                     continue
-                if self.r.sismember('crawled_set', item['url']):
+                if self.r.exists(item['url']):
                     #if self.htable.getRowByColumns(item['url'], ['indexData:url']):
                     continue
                 

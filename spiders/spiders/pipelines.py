@@ -83,7 +83,7 @@ class UrlsPipeline(object):
     def __init__(self):
         self.urls=[]
         self.redis_timeout = False
-        self.cachesize=20
+        self.cachesize= 50
         self.expire_time = 3600*24*7
         try:
             self.redis_db3 = redis.Redis(host='10.128.3.116', port=6379, db=3, socket_timeout=1)
@@ -111,17 +111,7 @@ class UrlsPipeline(object):
             pipe=self.client.pipeline()
             for url in self.urls:
                 pipe.rpush('linkbase',url.encode('utf8'))
-                
-                if not self.redis_timeout:
-                    try:
-                        self.redis_db0.rpush('linkbase', url.encode('utf8'))
-                        
-                        key = url.encode('utf8')
-                        if not self.redis_db3.exists(key):
-                            self.redis_db3.set(key, key, self.expire_time)
-                    except:
-                        print "redis timeout error"
-                        self.redis_timeout = True
+                self.redis_db0.rpush('linkbase', url.encode('utf8'))
             
             self.redis_timeout = False
             pipe.execute()
@@ -132,18 +122,9 @@ class UrlsPipeline(object):
 
             for url in self.urls:
                 pipe.rpush('linkbase',url.encode('utf8'))
-
-                if not self.redis_timeout:
-                    try:
-                        self.redis_db0.rpush('linkbase', url.encode('utf8'))
-                                        
-                        key = url.encode('utf8')
-                        if not self.redis_db3.exists(key):
-                            self.redis_db3.set(key, key, self.expire_time)
-                    except:
-                        print "redis timeout error"
-                        self.redis_timeout = True
-            self.redis_timeout = False
+                self.redis_db0.rpush('linkbase', url.encode('utf8'))
+                if self.redis_timeout == True:                            
+                    self.redis_timeout = False
             pipe.execute()
             self.urls=[]
             mutex.release()
@@ -152,7 +133,16 @@ class UrlsPipeline(object):
         if len(self.urls)>=self.cachesize:
             self.writeToRedis()
         if item.get('url','not_exists')!='not_exists':
-            if not self.client.sismember('crawled_set',item.get('url')):
-                self.client.sadd('crawled_set',item.get('url'))
-                self.urls.append(item['url'])
+            url = item['url']                        
+            key = url.encode('utf8')
+            if not self.redis_timeout:
+                try:               
+                    if not self.redis_db3.exists(key):
+                        self.redis_db3.set(key, key, self.expire_time)                             
+                        self.urls.append(url)
+                except:
+                    print "redis timeout error"
+                    self.redis_timeout = True                
+            #if not self.client.sismember('crawled_set',item.get('url')):
+                #self.client.sadd('crawled_set',item.get('url'))
         return item

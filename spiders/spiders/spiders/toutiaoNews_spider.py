@@ -39,7 +39,7 @@ class BaiduNewSpider(Spider):
     def initial(self):
         self.log('---started----')
         self.getStartUrl()
-        self.r = Redis(host = self.tool.HOST_REDIS, port = 6379, db = 0)
+        self.r = Redis(host = self.tool.HOST_REDIS1, port = 6379, db = 3)
             
     def finalize(self):
         self.log('---stopped---')
@@ -98,7 +98,7 @@ class BaiduNewSpider(Spider):
 
         if item['url'].find('?') >= 0:
             item['url'] = response.url
-            if self.r.sismember('crawled_set', item['url']):
+            if self.r.exists(item['url']):
                 #if self.htable.getRowByColumns(item['url'], ['indexData:url']):
                 return                         
         
@@ -133,7 +133,7 @@ class BaiduNewSpider(Spider):
                 continue
 
             item['url'] = itemdata['display_url'].encode('utf8')
-            if self.r.sismember('crawled_set', item['url']):
+            if self.r.exists(item['url']):
                 #if self.htable.getRowByColumns(item['url'], ['indexData:url']):
                 continue
 

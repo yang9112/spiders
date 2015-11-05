@@ -179,7 +179,7 @@ class HBaseTest(object):
 
 def demo():
 #    columnFamilies=['indexData:','result:']
-    ht = HBaseTest(host='10.133.16.85', table='origin')
+    ht = HBaseTest(host='10.133.5.49', table='origin')
 #    item={}
 #    item['url']='http://article.pchome.net/content-1773855.html'
 #    
@@ -192,7 +192,9 @@ def demo():
 #    items.append({'url':'http://article.pchome.net/content-1773854.html','name':'1773854'.encode('utf8')})
 #    #ht.putsResults(items)
 #    ht.put_Item(items[0])
-    print ht.getRowByColumns('http://www.xici.net/d219995605.htm', ['indexData:url', 'indexData:pubtime'])
+    
+    row = json.dumps(ht.getRowByColumns('http://www.ah.xinhuanet.com/2015-10/19/c_1116863573.htm', ['result:content']))
+    
     
 #    for row in ht.scannerWithColumns(needs=4,columns=['newsProperty:title']):
 #        print json.dumps(row,ensure_ascii=False)

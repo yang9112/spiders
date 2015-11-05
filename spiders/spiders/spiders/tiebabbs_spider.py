@@ -38,7 +38,7 @@ class BaiduNewSpider(Spider):
     def initial(self):
         self.log('---started----')
         self.getStartUrl()
-        self.r = Redis(host = self.tool.HOST_REDIS, port = 6379, db = 0)
+        self.r = Redis(host = self.tool.HOST_REDIS1, port = 6379, db = 3)
         #self.htable=HBaseTest(table = 'origin')
 
     def finalize(self):
@@ -150,7 +150,7 @@ class BaiduNewSpider(Spider):
                     continue
                 
                 item['url'] = self.domain_url + re.findall('(/p/.*?)[^\d]', elem.span.a['href'])[0]
-                if self.r.sismember('crawled_set', item['url']): 
+                if self.r.exists(item['url']): 
                     #if self.htable.getRowByColumns(item['url'], ['indexData:url']):
                     continue
                 

@@ -88,9 +88,9 @@ class GetQuery():
         return info_list
         
 if __name__ == '__main__':
-    #mysql = GetQuery()
-    mysql = GetQuery(host= '10.133.5.48', port = 3306, user='scrm',
-                     passwd='123@scrm', db ='scrm', tablename = 'subscribeinfo')
+    mysql = GetQuery()    
+    #mysql = GetQuery(host= '10.133.5.48', port = 3306, user='scrm',
+    #                 passwd='123456', db ='scrm', tablename = 'subscribeinfo')
 #    mysql = GetQuery(host='localhost', port = 3306, user='root',
 #                 passwd='123zxc', db ='spider_db', tablename = 'query')
     info_list = mysql.get_data()

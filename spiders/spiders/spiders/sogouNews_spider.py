@@ -35,7 +35,7 @@ class SogouNewSpider(Spider):
         #将final绑定到爬虫结束的事件上
         dispatcher.connect(self.initial,signals.engine_started)
         dispatcher.connect(self.finalize,signals.engine_stopped)
-        self.r = Redis(host = self.tool.HOST_REDIS, port = 6379, db = 0)
+        self.r = Redis(host = self.tool.HOST_REDIS1, port = 6379, db = 3)
     
     def initial(self):
         self.log('---started----')
@@ -103,7 +103,7 @@ class SogouNewSpider(Spider):
         
         if item['url'].find('?') >= 0:
             item['url'] = response.url
-            if self.r.sismember('crawled_set', item['url']):
+            if self.r.exists(item['url']):
                 #if self.htable.getRowByColumns(item['url'], ['indexData:url']):
                 return        
         
@@ -152,7 +152,7 @@ class SogouNewSpider(Spider):
                 else:
                     item['source'] = author.split()[0]
 
-                if self.r.sismember('crawled_set', item['url']):
+                if self.r.exists(item['url']):
                     #if self.htable.getRowByColumns(item['url'], ['indexData:url']):
                     continue
                 
