@@ -127,7 +127,7 @@ class dataCleaner():
             f = self.rep(f)
             return f
         else:
-            return None
+            return ""
     
     def rep(self, content):
         for sig in self.sigrep:
