@@ -95,11 +95,14 @@ class SogouNewSpider(Spider):
     def parse_content(self,response):
         item = response.meta['item']
         charset = 'utf-8'
-        for meta_item in response.xpath('//meta[@http-equiv]').extract():
-            is_exsit = re.match('charset=(.*?)"', meta_item)
-            if is_exsit:
-                charset = is_exsit.group(0)
-                break
+        try:
+            for meta_item in response.xpath('//meta[@http-equiv]').extract():
+                is_exsit = re.match('charset=(.*?)"', meta_item)
+                if is_exsit:
+                    charset = is_exsit.group(0)
+                    break
+        except:
+            pass
         
         if item['url'].find('?') >= 0:
             item['url'] = response.url
