@@ -136,8 +136,8 @@ class BingNewSpider(Spider):
                     continue
                 item['url'] = title.a['href']
 
-                if item['url'].find('htm?') >= 0 or item['url'].find('html?') >= 0:
-                    item['url'] = ''.join(item['url'].split('?')[0:-1])
+                if item['url'].find('?') >= 0:
+                    item['url'] = item['url'].split('?')[0]
                 
                 author = elem.find('span',class_='sn_ST')
                 if author:

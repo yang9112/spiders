@@ -133,8 +133,8 @@ class BaiduNewSpider(Spider):
                     continue
                 item['url'] = elem.h3.a['href']
 
-                if item['url'].find('htm?') >= 0 or item['url'].find('html?') >= 0:
-                    item['url'] = ''.join(item['url'].split('?')[0:-1])
+                if item['url'].find('?') >= 0:
+                    item['url'] = item['url'].split('?')[0]
                 
                 author = elem.find('p',class_='c-author')
                 if author:

@@ -165,8 +165,8 @@ class BaiduNewSpider(Spider):
                     continue
                 item['url'] = elem.h3.a['href'].replace('user', 'www')
                 
-                if item['url'].find('htm?') >= 0 or item['url'].find('html?') >= 0:
-                    item['url'] = ''.join(item['url'].split('?')[0:-1])
+                if item['url'].find('?') >= 0:
+                    item['url'] = item['url'].split('?')[0]
 
                 if self.r.exists(item['url']):
                     #if self.htable.getRowByColumns(item['url'], ['indexData:url']):
