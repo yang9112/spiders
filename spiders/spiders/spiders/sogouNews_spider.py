@@ -104,12 +104,6 @@ class SogouNewSpider(Spider):
         except:
             pass
         
-        if item['url'].find('?') >= 0:
-            item['url'] = response.url
-            if self.r.exists(item['url']):
-                #if self.htable.getRowByColumns(item['url'], ['indexData:url']):
-                return        
-        
         if response.body:
             try:
                 bsoup = BeautifulSoup(response.body, from_encoding=charset)
@@ -142,9 +136,6 @@ class SogouNewSpider(Spider):
                 else:
                     continue
                 item['url'] = elem.h3.a['href']
-
-                if item['url'].find('?') >= 0:
-                    item['url'] = item['url'].split('?')[0]             
                 
                 author = elem.cite.get_text()
                 if len(author.split()) > 1:

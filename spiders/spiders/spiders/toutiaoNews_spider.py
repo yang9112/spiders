@@ -98,13 +98,7 @@ class BaiduNewSpider(Spider):
                     charset = is_exsit.group(0)
                     break
         except:
-            pass
-
-        if item['url'].find('?') >= 0:
-            item['url'] = response.url
-            if self.r.exists(item['url']):
-                #if self.htable.getRowByColumns(item['url'], ['indexData:url']):
-                return                         
+            pass                 
         
         if response.body:
             try:

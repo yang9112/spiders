@@ -94,12 +94,6 @@ class TianyaBBSSpider(Spider):
     def parse_content(self,response):
         item = response.meta['item']
         
-        if item['url'].find('?') >= 0:
-            item['url'] = response.url
-            if self.r.exists(item['url']):
-                #if self.htable.getRowByColumns(item['url'], ['indexData:url']):
-                return        
-        
         if response.body:
             bsoup = BeautifulSoup(response.body)
             
@@ -137,10 +131,7 @@ class TianyaBBSSpider(Spider):
                     item['title'] = elem.div.h3.a.get_text()
                 except:
                     continue
-                item['url'] = elem.div.h3.a['href']
-
-                if item['url'].find('?') >= 0:
-                    item['url'] = item['url'].split('?')[0]             
+                item['url'] = elem.div.h3.a['href']         
                 
                 author = elem.find('p', class_='source')
                 if author:

@@ -92,12 +92,6 @@ class BaiduNewSpider(Spider):
 
     def parse_content(self,response):
         item = response.meta['item']
-
-        if item['url'].find('?') >= 0:
-            item['url'] = response.url
-            if self.r.exists(item['url']): 
-                #if self.htable.getRowByColumns(item['url'], ['indexData:url']):
-                return
     
         main_content = response.xpath('//head').extract()[0]
         content_list = re.findall('({"del_w".*?})', main_content)
@@ -164,9 +158,6 @@ class BaiduNewSpider(Spider):
                 except:
                     continue
                 item['url'] = elem.h3.a['href'].replace('user', 'www')
-                
-                if item['url'].find('?') >= 0:
-                    item['url'] = item['url'].split('?')[0]
 
                 if self.r.exists(item['url']):
                     #if self.htable.getRowByColumns(item['url'], ['indexData:url']):

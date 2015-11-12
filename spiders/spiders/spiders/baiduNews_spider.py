@@ -99,11 +99,6 @@ class BaiduNewSpider(Spider):
         except:
             pass
         
-        if item['url'].find('?') >= 0:
-            item['url'] = response.url
-            if self.r.exists(item['url']):
-                return                         
-        
         if response.body:
             try:
                 bsoup = BeautifulSoup(response.body, from_encoding=charset)
@@ -136,9 +131,6 @@ class BaiduNewSpider(Spider):
                     continue
                 item['url'] = elem.h3.a['href']
 
-                if item['url'].find('?') >= 0:
-                    item['url'] = item['url'].split('?')[0]
-                
                 author = elem.find('p',class_='c-author')
                 if author:
                     source_time = author.get_text().split()

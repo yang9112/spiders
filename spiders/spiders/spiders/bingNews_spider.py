@@ -98,12 +98,6 @@ class BingNewSpider(Spider):
                     break
         except:
             pass
-
-        if item['url'].find('?') >= 0:
-            item['url'] = response.url
-            if self.r.exists(item['url']):  
-                #if self.htable.getRowByColumns(item['url'], ['indexData:url']):
-                return        
         
         if response.body:
             try:
@@ -138,9 +132,6 @@ class BingNewSpider(Spider):
                 else:
                     continue
                 item['url'] = title.a['href']
-
-                if item['url'].find('?') >= 0:
-                    item['url'] = item['url'].split('?')[0]
                 
                 author = elem.find('span',class_='sn_ST')
                 if author:
