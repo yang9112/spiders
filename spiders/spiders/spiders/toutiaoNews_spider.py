@@ -131,9 +131,9 @@ class BaiduNewSpider(Spider):
                 continue
 
             item['url'] = itemdata['display_url'].encode('utf8')
-            
-            if item['url'].find("html?") or item['url'].find("htm?"):
-                item['url'] = "".join(item['url'].split("?")[0:-1])            
+
+            if item['url'].find("html?") > 0 or item['url'].find("htm?") > 0:
+                item['url'] = "".join(item['url'].split("?")[0:-1])         
             
             if self.r.exists(item['url']):
                 #if self.htable.getRowByColumns(item['url'], ['indexData:url']):

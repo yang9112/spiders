@@ -149,7 +149,7 @@ class BaiduNewSpider(Spider):
                     print 'no element of author'
                     continue
                 
-                if item['url'].find("html?") or item['url'].find("htm?"):
+                if item['url'].find("html?") > 0 or item['url'].find("htm?") > 0:
                     item['url'] = "".join(item['url'].split("?")[0:-1])
 
                 if self.r.exists(item['url']):

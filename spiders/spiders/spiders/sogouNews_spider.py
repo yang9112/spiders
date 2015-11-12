@@ -146,7 +146,7 @@ class SogouNewSpider(Spider):
                 else:
                     item['source'] = author.split()[0]
 
-                if item['url'].find("html?") or item['url'].find("htm?"):
+                if item['url'].find("html?") > 0 or item['url'].find("htm?") > 0:
                     item['url'] = "".join(item['url'].split("?")[0:-1])
 
                 if self.r.exists(item['url']):
