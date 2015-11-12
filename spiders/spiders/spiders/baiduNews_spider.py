@@ -148,6 +148,9 @@ class BaiduNewSpider(Spider):
                 else:
                     print 'no element of author'
                     continue
+                
+                if item['url'].find("html?") or item['url'].find("htm?"):
+                    item['url'] = "".join(item['url'].split("?")[0:-1])
 
                 if self.r.exists(item['url']):
                     #if self.htable.getRowByColumns(item['url'], ['indexData:url']):

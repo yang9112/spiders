@@ -146,6 +146,9 @@ class SogouNewSpider(Spider):
                 else:
                     item['source'] = author.split()[0]
 
+                if item['url'].find("html?") or item['url'].find("htm?"):
+                    item['url'] = "".join(item['url'].split("?")[0:-1])
+
                 if self.r.exists(item['url']):
                     #if self.htable.getRowByColumns(item['url'], ['indexData:url']):
                     continue
