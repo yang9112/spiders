@@ -29,7 +29,7 @@ DOWNLOADER_MIDDLEWARES = {
 DOWNLOAD_HANDLERS = {'s3': None,}
 
 #the max depth of the spider
-DEPTH_LIMIT = 1
+#DEPTH_LIMIT = 1
 
 ##是否收集最大深度数据。
 #DEPTH_STATS = False
