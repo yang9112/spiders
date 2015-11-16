@@ -55,7 +55,6 @@ class XicibbsSpider(Spider):
         tag = '?sort=date'
         for key in self.xici_dict.keys():
             self.start_urls.append(key + tag)
-            break;
             
     #一个回调函数中返回多个Request以及Item的例子
     def parse(self,response):
@@ -126,9 +125,7 @@ class XicibbsSpider(Spider):
         elem_list = []        
         items = []
         content = re.findall(r'"docinfo":\[.*?\]', response.body)
-        source_name = self.xici_dict[response.url.split('?')[0]]
-        print source_name
-        
+        source_name = self.xici_dict[response.url.split('?')[0]]        
         
         if len(content) > 0:
             elem_list = re.findall('{.*?}', content[0])
@@ -136,9 +133,15 @@ class XicibbsSpider(Spider):
         if len(elem_list) > 0:
             for elem in elem_list:
                 item = DataItem()
-                elem = json.loads(elem.decode('gb2312'))
                 
-                item['source'] = '西祠胡同'
+                elem = elem.decode('gb18030')
+                try:
+                    elem = json.loads(elem)
+                except:
+                    print elem
+                    continue
+                    
+                item['source'] = source_name
                 item['channel'] = 'Search engine'
                 
                 item['collecttime'] = time.strftime("%Y-%m-%d %H:%M", time.localtime())
