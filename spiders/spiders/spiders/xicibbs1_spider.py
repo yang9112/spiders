@@ -36,12 +36,6 @@ class XicibbsSpider(Spider):
         self.log('---started----')
         self.getStartUrl()
         self.r = Redis(host = self.tool.HOST_REDIS1, port = 6379, db = 3)
-        fp = open('xici.txt', 'rb')
-        for line in fp.readlines():
-            keys = line.split('\t');
-            self.xici_dict.setdefault(keys[1], keys[0].decode('utf8'))
-        
-        fp.close()
     
         #self.htable=HBaseTest(table = 'origin')
 
@@ -52,6 +46,12 @@ class XicibbsSpider(Spider):
 
     def getStartUrl(self):
         #从文件初始化查询关键词
+        fp = open('xici.txt', 'rb')
+        for line in fp.readlines():
+            keys = line.split('\t');
+            self.xici_dict.setdefault(keys[1], keys[0].decode('utf8'))
+        fp.close()
+        
         tag = '?sort=date'
         for key in self.xici_dict.keys():
             self.start_urls.append(key + tag)
