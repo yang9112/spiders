@@ -8,7 +8,6 @@ from scrapy.selector import Selector
 from scrapy.exceptions import CloseSpider
 from spiders.items import DataItem
 from spiders.tools import Utools
-from spiders.query import GetQuery
 from spiders.dataCleaner import dataCleaner
 from spiders.hbaseClient import HBaseTest
 from bs4 import BeautifulSoup
