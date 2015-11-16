@@ -129,6 +129,8 @@ class XicibbsSpider(Spider):
         
         if len(content) > 0:
             elem_list = re.findall('{.*?}', content[0])
+        else:
+            print response.url.split('?')[0]
         
         if len(elem_list) > 0:
             for elem in elem_list:
