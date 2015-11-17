@@ -128,12 +128,13 @@ class XicibbsSpider(Spider):
         elem_list = []        
         items = []
         content = re.findall(r'"docinfo":\[.*?\]', response.body)
-        source_name = self.xici_dict[response.url.replace('?sort=date', '')]        
+        if self.xici_dict.has_key(response.url.replace('?sort=date', '')):
+            source_name = self.xici_dict[response.url.replace('?sort=date', '')]
+        else:
+            return
         
         if len(content) > 0:
             elem_list = re.findall('\{\".*?visited\":[a-z]{4,5}\}', content[0])
-        else:
-            print response.url
         
         if len(elem_list) > 0:
             for elem in elem_list:
@@ -151,7 +152,6 @@ class XicibbsSpider(Spider):
                     continue
                 item['title'] = elem['aDocs_i_1']
                 
-                    
                 item['source'] = source_name
                 item['channel'] = 'Search engine'
                 
@@ -159,8 +159,6 @@ class XicibbsSpider(Spider):
                 item['pubtime'] = item['collecttime'][0:4] + '-' + elem['ShortDate']
                 if self.tool.old_news(item['pubtime']):
                     continue
-                
-                
                 
                 items.append(item)
                 
