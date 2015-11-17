@@ -97,6 +97,9 @@ class XicibbsSpider(Spider):
                 content_list[0] = content_list[0].replace('{','').replace('}', '')
                 maindict = json.loads('{' + content_list[0] + '}', encoding='utf8')
                 item['medianame'] = maindict['UserName']
+                item['pubtime'] = maindict['really_updated_at'][:-3]
+                if self.tool.old_news(item['pubtime']):
+                    return
                 
                 item['content'] = []    
                 for content in content_list:
@@ -113,7 +116,7 @@ class XicibbsSpider(Spider):
                         break
                 if item:
                     item['content'] = self.dc.process('<div>' + ' '.join(item['content']) + '</div>')
-                    print 'url: ' + item['url'] + ' is added'
+                    print 'url: ' + item['url'] + ' ' + str(item['pubtime']) + ' is added'
                     return item
             except:
                 print item['url'] + ' load failed.'
