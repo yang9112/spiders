@@ -145,6 +145,12 @@ class XicibbsSpider(Spider):
                 except:
                     print elem
                     continue
+                
+                item['url'] = 'http://www.xici.net/d%s.htm' % elem['aDocs_i_0']
+                if self.r.exists(item['url']):
+                    continue
+                item['title'] = elem['aDocs_i_1']
+                
                     
                 item['source'] = source_name
                 item['channel'] = 'Search engine'
@@ -154,8 +160,7 @@ class XicibbsSpider(Spider):
                 if self.tool.old_news(item['pubtime']):
                     continue
                 
-                item['url'] = 'http://www.xici.net/d%s.htm' % elem['aDocs_i_0']
-                item['title'] = elem['aDocs_i_1']
+                
                 
                 items.append(item)
                 
