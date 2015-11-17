@@ -125,7 +125,7 @@ class XicibbsSpider(Spider):
         elem_list = []        
         items = []
         content = re.findall(r'"docinfo":\[.*?\]', response.body)
-        source_name = self.xici_dict[response.url.replace('?sort=date')]        
+        source_name = self.xici_dict[response.url.replace('?sort=date', '')]        
         
         if len(content) > 0:
             elem_list = re.findall('\{\".*?visited\":[a-z]{4,5}\}', content[0])
