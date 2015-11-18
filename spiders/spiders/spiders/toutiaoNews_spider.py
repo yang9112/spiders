@@ -22,7 +22,7 @@ reload(sys)
 sys.setdefaultencoding('utf-8')
 sys.setrecursionlimit(5000)
 
-class BaiduNewSpider(Spider):
+class ToutiaoSpider(Spider):
     name = "toutiaonew"
     domain_url = "http://toutiao.com/search_content"
     tool = Utools()
@@ -31,7 +31,7 @@ class BaiduNewSpider(Spider):
     test_hbase = True
     
     def __init__ (self):
-        super(BaiduNewSpider,self).__init__()
+        super(ToutiaoSpider,self).__init__()
         #将final绑定到爬虫结束的事件上
         dispatcher.connect(self.initial,signals.engine_started)
         dispatcher.connect(self.finalize,signals.engine_stopped)

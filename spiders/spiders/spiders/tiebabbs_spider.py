@@ -21,7 +21,7 @@ import urllib
 reload(sys)
 sys.setdefaultencoding('utf-8')
 
-class BaiduNewSpider(Spider):
+class TiebaBBSSpider(Spider):
     name = "tiebabbs"
     domain_url = "http://tieba.baidu.com"
     tool = Utools()    
@@ -30,7 +30,7 @@ class BaiduNewSpider(Spider):
     test_hbase = True
  
     def __init__ (self):
-        super(BaiduNewSpider,self).__init__()
+        super(TiebaBBSSpider,self).__init__()
         #将final绑定到爬虫结束的事件上
         dispatcher.connect(self.initial,signals.engine_started)
         dispatcher.connect(self.finalize,signals.engine_stopped)

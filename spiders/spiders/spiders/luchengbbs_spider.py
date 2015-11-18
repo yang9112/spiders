@@ -21,7 +21,7 @@ reload(sys)
 sys.setdefaultencoding('utf-8')
 sys.setrecursionlimit(5000)
 
-class BaiduNewSpider(Spider):
+class LuChengBBSSpider(Spider):
     name = "luchengbbs"
     domain_url = "http://www.zjxslm.com/"
     combine_url = 'forum.php?mod=forumdisplay&fid=%d&orderby=lastpost&filter=dateline&dateline=86400'
@@ -32,7 +32,7 @@ class BaiduNewSpider(Spider):
     test_hbase = True
     
     def __init__ (self):
-        super(BaiduNewSpider,self).__init__()
+        super(LuChengBBSSpider,self).__init__()
         #将final绑定到爬虫结束的事件上
         dispatcher.connect(self.initial,signals.engine_started)
         dispatcher.connect(self.finalize,signals.engine_stopped)
