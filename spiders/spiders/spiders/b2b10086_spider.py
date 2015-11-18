@@ -71,9 +71,12 @@ class B2bNewSpider(Spider):
         
         if response.body:
             bsoup = BeautifulSoup(response.body, from_encoding='utf-8')
-    
-            content = bsoup.select('div#mobanDiv')[0]
-            print content
+            
+            try:
+                content = bsoup.select('div#mobanDiv')[0]
+            except:
+                content = self.dc.process(str(response.body))
+            item['content'] = content
         else:
             return
 
@@ -88,10 +91,11 @@ class B2bNewSpider(Spider):
             for elem in elem_list:
                 item = DataItem()
                 
+                item['dtype'] = 'news'
                 item['source'] = '中国移动采购与招标'
                 item['channel'] = 'Search engine'                
                 
-                if elem.find("onclick") < 0:
+                if elem.find("onmouseout") < 0:
                     continue
                 itemID = re.search("selectResult\(\'([\d]+?)\'\)", elem).group(1)                                
                 item['url'] = ('http://b2b.10086.cn/b2b/main/viewNoticeContent.html?'

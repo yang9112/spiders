@@ -139,6 +139,7 @@ class XicibbsSpider(Spider):
         if len(elem_list) > 0:
             for elem in elem_list:
                 item = DataItem()
+                item['dtype'] = 'forum'
                 
                 elem = elem.decode('gb18030')
                 try:
