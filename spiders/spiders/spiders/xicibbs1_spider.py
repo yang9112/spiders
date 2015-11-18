@@ -131,8 +131,8 @@ class XicibbsSpider(Spider):
         if self.xici_dict.has_key(response.url.replace('?sort=date', '')):
             source_name = self.xici_dict[response.url.replace('?sort=date', '')]
         else:
-            return
-        
+            source_name = '西祠胡同'
+            
         if len(content) > 0:
             elem_list = re.findall('\{\".*?visited\":[a-z]{4,5}\}', content[0])
         
