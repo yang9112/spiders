@@ -100,8 +100,8 @@ class B2bNewSpider(Spider):
                 if self.r.exists(item['url']):
                     continue
                 
-                res = re.findall('<td.*?<\td>', elem)
-                item['medianame'] = re.sub('<.*?>', res[0])
+                res = re.findall('<td.*?</td>', elem)
+                item['medianame'] = re.sub('<.*?>', '', res[0])
                 item['title'] = re.sub('<.*?>', '', res[2])
                 
                 item['collecttime'] = time.strftime("%Y-%m-%d %H:%M", time.localtime())
