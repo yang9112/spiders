@@ -77,8 +77,8 @@ class B2bNewSpider(Spider):
             except:
                 content = self.dc.process(str(response.body))
             item['content'] = content
-        else:
-            return
+            print 'url: ' + item['url'] + ' is added'
+            return item
 
     def parse_items(self, response):
         elem_list = []        
