@@ -125,8 +125,7 @@ class UrlsPipeline(object):
 
     def process_item(self, item, spider):
         if len(self.urls) >= self.cachesize:
-            self.writeToHbaseRedis()
-            self.writeToRedis()            
+            self.writeToHbaseRedis()         
             
         if item.get('url','not_exists')!='not_exists':
             url = item['url']                        
