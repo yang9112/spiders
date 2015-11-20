@@ -13,6 +13,7 @@ from scrapy.xlib.pydispatch import dispatcher
 from scrapy import signals
 import redis
 import threading
+import traceback
 
 reload(sys)
 sys.setdefaultencoding('utf-8')
@@ -79,13 +80,14 @@ class UrlsPipeline(object):
                 for item in self.items:
                     try:
                         self.htable1.put_Item(item)
-                    except Exception, e:
-                        print e.message
+                    except:
+                        traceback.print_exc()                        
                         continue
                     
                     try:
                         self.htable.put_Item(item)
                     except:
+                        traceback.print_exc()
                         print 'url: '+ item['url'] + ' saved failed'
                         
                     pipe.rpush('linkbase', item['url'].encode('utf8'))
@@ -103,12 +105,14 @@ class UrlsPipeline(object):
             for item in self.items:
                 try:
                     self.htable1.put_Item(item)
-                except Exception, e:
-                    print e.message
+                except:
+                    traceback.print_exc()                    
+                    continue
                 
                 try:
                     self.htable.put_Item(item)
                 except:
+                    traceback.print_exc()
                     print 'url: '+ item['url'] + ' saved failed'
                 
                 pipe.rpush('linkbase',item['url'].encode('utf8'))
