@@ -37,7 +37,6 @@ class JsonWriterPipeline(object):
         
 class UrlsPipeline(object):
     def __init__(self):
-        self.urls = []
         self.items = []
         self.redis_timeout = False
         self.cachesize= 50
@@ -118,23 +117,20 @@ class UrlsPipeline(object):
                     self.redis_timeout = False
                         
             self.items=[]
-            self.urls=[]
             pipe.execute()
             mutex.release()
 
 
     def process_item(self, item, spider):
-        if len(self.urls) >= self.cachesize:
+        if len(self.items) >= self.cachesize:
             self.writeToHbaseRedis()         
             
-        if item.get('url','not_exists')!='not_exists':
-            url = item['url']                        
-            key = url.encode('utf8')
+        if item.get('url','not_exists')!='not_exists':                    
+            key = item['url'].encode('utf8')
             if not self.redis_timeout:
                 try:               
                     if not self.redis_db3.exists(key):
-                        self.redis_db3.set(key, key, self.expire_time)                             
-                        self.urls.append(url)
+                        self.redis_db3.set(key, key, self.expire_time)
                         self.items.append(item)
                 except:
                     print "redis timeout error"
