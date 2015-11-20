@@ -89,9 +89,11 @@ class UrlsPipeline(object):
                     except:
                         traceback.print_exc()
                         print 'url: '+ item['url'] + ' saved failed'
-                        
-                    pipe.rpush('linkbase', item['url'].encode('utf8'))
-                    self.redis_db0.rpush('linkbase', item['url'].encode('utf8'))
+                    
+                    key = item['url'].encode('utf8')
+                    self.redis_db3.set(key, key, self.expire_time)
+                    pipe.rpush('linkbase', key)
+                    self.redis_db0.rpush('linkbase', key)
                 self.redis_timeout = False
                 pipe.execute()
                 
@@ -115,8 +117,10 @@ class UrlsPipeline(object):
                     traceback.print_exc()
                     print 'url: '+ item['url'] + ' saved failed'
                 
-                pipe.rpush('linkbase',item['url'].encode('utf8'))
-                self.redis_db0.rpush('linkbase', item['url'].encode('utf8'))
+                key = item['url'].encode('utf8')
+                self.redis_db3.set(key, key, self.expire_time)
+                pipe.rpush('linkbase', key)
+                self.redis_db0.rpush('linkbase', key)
                 if self.redis_timeout == True:                            
                     self.redis_timeout = False
                         
@@ -130,11 +134,10 @@ class UrlsPipeline(object):
             self.writeToHbaseRedis()         
             
         if item.get('url','not_exists')!='not_exists':                    
-            key = item['url'].encode('utf8')
             if not self.redis_timeout:
+                key = item['url'].encode('utf8')
                 try:               
                     if not self.redis_db3.exists(key):
-                        self.redis_db3.set(key, key, self.expire_time)
                         self.items.append(item)
                 except:
                     print "redis timeout error"
