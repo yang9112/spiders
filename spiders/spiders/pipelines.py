@@ -50,7 +50,7 @@ class UrlsPipeline(object):
     def initialize(self):
         #hbase
         self.htable=HBaseTest(table = 'origin')
-        self.htable1=HBaseTest(host = '10.128.3.104', table = 'origin')
+        self.htable1=HBaseTest(host = '10.128.4.9', table = 'origin')
 
         #redis
         try:
