@@ -100,7 +100,6 @@ class UrlsPipeline(object):
         self.htable.close_trans()
         self.htable1.close_trans()
             
-            
     def writeToHbaseRedis(self):
         if mutex.acquire(1):
             pipe=self.client.pipeline()
@@ -141,6 +140,7 @@ class UrlsPipeline(object):
                         self.items.append(item)
                 except:
                     print "redis timeout error"
+                    traceback.print_exc()
                     self.redis_timeout = True
             #if not self.client.sismember('crawled_set',item.get('url')):
                 #self.client.sadd('crawled_set',item.get('url'))

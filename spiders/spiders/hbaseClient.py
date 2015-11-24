@@ -103,7 +103,10 @@ class HBaseTest(object):
                 label = 'type'
             
             mutation.append(Mutation(column=columnFamily+label,value=val))
-            
+        
+        if len(mutation) == 0:
+            return
+        
         self.client.mutateRow(self.table, rowKey, mutation, {})
               
     def getRow(self, row):
