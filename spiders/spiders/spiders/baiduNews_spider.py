@@ -90,7 +90,7 @@ class BaiduNewSpider(Spider):
     def parse_content(self, response):
         item = response.meta['item']
         try:
-            charset = response.charset
+            charset = response.encoding
         except:
             charset = 'utf-8'
             

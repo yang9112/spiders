@@ -102,7 +102,7 @@ class HBaseTest(object):
             if label == 'dtype':
                 label = 'type'
             
-            mutation.append(Mutation(column=columnFamily+label,value=val))
+            mutation.append(Mutation(column=columnFamily+label,value=val + ""))
         
         if len(mutation) == 0:
             return
