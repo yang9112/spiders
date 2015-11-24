@@ -92,7 +92,7 @@ class HBaseTest(object):
         #将scrapy产生的Item存入hbase
         columnFamily=self.columnFamilies[0]
         
-        rowKey=item.get('url','not set')
+        rowKey=item.get('url','not set').encode('utf8')
         if rowKey == 'not set':
             return
         
@@ -102,7 +102,7 @@ class HBaseTest(object):
             if label == 'dtype':
                 label = 'type'
             
-            mutation.append(Mutation(column=columnFamily+label,value=val + ""))
+            mutation.append(Hbase.Mutation(column=columnFamily+label,value=val))
         
         if len(mutation) == 0:
             return

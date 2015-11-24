@@ -97,9 +97,10 @@ class BingNewSpider(Spider):
         if response.body:
             try:
                 bsoup = BeautifulSoup(response.body, from_encoding=charset)
+                item['content'] = self.dc.process(str(bsoup).decode(charset))
             except:
                 bsoup = BeautifulSoup(response.body, from_encoding='utf-8')
-            item['content'] = self.dc.process(str(bsoup))
+                item['content'] = self.dc.process(str(bsoup))
             if len(item['content'].encode('utf8')) < len(item['abstract']):
                 item['content'] = item['abstract']
             if item['content']:
