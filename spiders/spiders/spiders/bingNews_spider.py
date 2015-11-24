@@ -93,15 +93,6 @@ class BingNewSpider(Spider):
             charset = response.encoding
         except:
             charset = 'utf-8'
-
-        try:
-            for meta_item in response.xpath('//meta[@http-equiv]').extract():
-                is_exsit = re.match('charset=(.*?)"', meta_item)
-                if is_exsit:
-                    charset = is_exsit.group(0)
-                    break
-        except:
-            pass
         
         if response.body:
             try:
@@ -159,11 +150,13 @@ class BingNewSpider(Spider):
                     item['source'] = self.tool.get_realname(item['medianame'])
                     item['medianame'] = ' '
                 except:
-                    pass
+                    continue
                 
                 item['collecttime'] = time.strftime("%Y-%m-%d %H:%M", time.localtime())
                 if elem.find('span',class_='sn_snip'):
-                    item['abstract']=elem.find('span',class_='sn_snip').get_text()
+                    item['abstract'] = elem.find('span',class_='sn_snip').get_text()
+                else:
+                    item['abstract'] = ' '
                 items.append(item)
         return items
      

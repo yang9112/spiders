@@ -93,15 +93,6 @@ class BaiduNewSpider(Spider):
             charset = response.encoding
         except:
             charset = 'utf-8'
-            
-        try:
-            for meta_item in response.xpath('//meta[@http-equiv]').extract():
-                is_exsit = re.match('charset=(.*?)"', meta_item)
-                if is_exsit:
-                    charset = is_exsit.group(0)
-                    break
-        except:
-            pass
         
         if response.body:
             try:
