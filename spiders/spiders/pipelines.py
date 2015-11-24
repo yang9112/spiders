@@ -81,8 +81,9 @@ class UrlsPipeline(object):
                     try:
                         self.htable1.put_Item(item)
                     except:
+                        print item
                         traceback.print_exc()                        
-                        continue
+                        break
                     
                     try:
                         self.htable.put_Item(item)
@@ -107,8 +108,9 @@ class UrlsPipeline(object):
                 try:
                     self.htable1.put_Item(item)
                 except:
+                    print item
                     traceback.print_exc()                    
-                    continue
+                    break
                 
                 try:
                     self.htable.put_Item(item)
