@@ -89,7 +89,11 @@ class BingNewSpider(Spider):
 
     def parse_content(self,response):
         item = response.meta['item']
-        charset = 'utf-8'
+        try:
+            charset = response.charset
+        except:
+            charset = 'utf-8'
+
         try:
             for meta_item in response.xpath('//meta[@http-equiv]').extract():
                 is_exsit = re.match('charset=(.*?)"', meta_item)
@@ -106,7 +110,7 @@ class BingNewSpider(Spider):
                 bsoup = BeautifulSoup(response.body, from_encoding='utf-8')
             item['content'] = self.dc.process(str(bsoup))
             if len(item['content'].encode('utf8')) < len(item['abstract']):
-                item['content'] = item['abstract'].replace('百度快照', '')
+                item['content'] = item['abstract']
             if item['content']:
                 print 'url: ' + item['url'] + ' is added'
                 return item

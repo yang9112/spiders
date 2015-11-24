@@ -87,9 +87,13 @@ class BaiduNewSpider(Spider):
             continue
             yield request
 
-    def parse_content(self,response):
+    def parse_content(self, response):
         item = response.meta['item']
-        charset = 'utf-8'
+        try:
+            charset = response.charset
+        except:
+            charset = 'utf-8'
+            
         try:
             for meta_item in response.xpath('//meta[@http-equiv]').extract():
                 is_exsit = re.match('charset=(.*?)"', meta_item)
