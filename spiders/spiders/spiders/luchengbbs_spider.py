@@ -24,7 +24,8 @@ sys.setrecursionlimit(5000)
 class LuChengBBSSpider(Spider):
     name = "luchengbbs"
     domain_url = "http://www.zjxslm.com/"
-    combine_url = 'forum.php?mod=forumdisplay&fid=%d&orderby=lastpost&filter=dateline&dateline=86400'
+    combine_url = ("forum.php?mod=forumdisplay&fid=%d&orderby=lastpost"
+                    + "&filter=dateline&dateline=86400")
     
     tool = Utools()
     dc = dataCleaner()
@@ -60,7 +61,8 @@ class LuChengBBSSpider(Spider):
         # test the status of hbase and thrift server
         if self.test_hbase:
             try:
-                self.htable=HBaseTest(table = 'origin')
+                self.htable=HBaseTest(host = self.tool.HOST_HBASE1, 
+                                      table = 'origin')
                 self.htable.close_trans()
                 self.test_hbase = False
             except:

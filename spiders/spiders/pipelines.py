@@ -42,6 +42,7 @@ class UrlsPipeline(object):
         self.redis_timeout = False
         self.cachesize= 50
         self.expire_time = 3600*24*7
+        self.tool = Utools()
 
         #事件绑定
         dispatcher.connect(self.initialize,signals.engine_started)
@@ -50,12 +51,14 @@ class UrlsPipeline(object):
     def initialize(self):
         #hbase
         self.htable=HBaseTest(table = 'origin')
-        self.htable1=HBaseTest(host = '10.128.4.18', table = 'origin')
+        self.htable1=HBaseTest(host = self.tool.HOST_HBASE1, table = 'origin')
 
         #redis
         try:
-            self.redis_db3 = redis.Redis(host='10.128.3.116', port=6379, db=3, socket_timeout=1)
-            self.redis_db0 = redis.Redis(host='10.128.3.116', port=6379, db=0, socket_timeout=1)
+            self.redis_db3 = redis.Redis(host=self.tool.HOST_REDIS1, 
+                                         port=6379, db=3, socket_timeout=1)
+            self.redis_db0 = redis.Redis(host=self.tool.HOST_REDIS1,
+                                         port=6379, db=0, socket_timeout=1)
         except Exception, e:
             print 'connect failed: ' + e.strerror
             pass

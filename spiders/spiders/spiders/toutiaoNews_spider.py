@@ -59,7 +59,8 @@ class ToutiaoSpider(Spider):
         # test the status of hbase and thrift server
         if self.test_hbase:
             try:
-                self.htable=HBaseTest(table = 'origin')
+                self.htable=HBaseTest(host = self.tool.HOST_HBASE1, 
+                                      table = 'origin')
                 self.htable.close_trans()
                 self.test_hbase = False
             except:

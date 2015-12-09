@@ -8,6 +8,7 @@ class Utools():
     HOST_SQL = 'localhost'
     HOST_REDIS = 'localhost'
     HOST_HBASE = '10.133.5.49'
+    HOST_HBASE1 = '10.128.4.18'
     HOST_SQL = '10.128.3.114'
     HOST_REDIS = '10.133.5.48'
     HOST_REDIS1 = "10.128.3.116"
