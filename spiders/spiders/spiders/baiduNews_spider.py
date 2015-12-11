@@ -111,7 +111,12 @@ class BaiduNewSpider(Spider):
     def parse_items(self,response):
         if response.body:
             bsoup = BeautifulSoup(response.body,from_encoding='utf-8')
-        main_content = bsoup.select('div#container')[0].select('div#content_left')[0]
+        main_content = 0
+        try:
+            main_content = bsoup.select('div#container')[0].select('div#content_left')[0]
+        except:
+            print 'url: ' + response.url + ' is empty'
+            return []
         if main_content:
             elem_list = main_content.find_all('div', class_='result')
         items = []
