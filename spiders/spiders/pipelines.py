@@ -43,6 +43,7 @@ class UrlsPipeline(object):
         self.cachesize= 50
         self.expire_time = 3600*24*7
         self.tool = Utools()
+        self.hbase_tag = True
 
         #事件绑定
         dispatcher.connect(self.initialize,signals.engine_started)
@@ -50,7 +51,12 @@ class UrlsPipeline(object):
         
     def initialize(self):
         #hbase
-        self.htable=HBaseTest(table = 'origin')
+        try:
+            self.htable=HBaseTest(table = 'origin')
+        except:
+            self.hbase_tag = False
+            print 'can not connect to thrift host: ' + self.tool.HOST_HBASE
+            
         self.htable1=HBaseTest(host = self.tool.HOST_HBASE1, table = 'origin')
 
         #redis
@@ -88,11 +94,12 @@ class UrlsPipeline(object):
                         traceback.print_exc()                        
                         break
                     
-                    try:
-                        self.htable.put_Item(item)
-                    except:
-                        traceback.print_exc()
-                        print 'url: '+ item['url'] + ' saved failed'
+                    if self.hbase_tag:
+                        try:
+                            self.htable.put_Item(item)
+                        except:
+                            traceback.print_exc()
+                            print 'url: '+ item['url'] + ' saved failed'
                     
                     key = item['url'].encode('utf8')
                     self.redis_db3.set(key, key, self.expire_time)
@@ -101,7 +108,8 @@ class UrlsPipeline(object):
                 self.redis_timeout = False
                 pipe.execute()
                 
-        self.htable.close_trans()
+        if self.hbase_tag:
+            self.htable.close_trans()
         self.htable1.close_trans()
             
     def writeToHbaseRedis(self):
@@ -115,11 +123,12 @@ class UrlsPipeline(object):
                     traceback.print_exc()                    
                     break
                 
-                try:
-                    self.htable.put_Item(item)
-                except:
-                    traceback.print_exc()
-                    print 'url: '+ item['url'] + ' saved failed'
+                if self.hbase_tag:
+                    try:
+                        self.htable.put_Item(item)
+                    except:
+                        traceback.print_exc()
+                        print 'url: '+ item['url'] + ' saved failed'
                 
                 key = item['url'].encode('utf8')
                 self.redis_db3.set(key, key, self.expire_time)
@@ -131,7 +140,6 @@ class UrlsPipeline(object):
             self.items=[]
             pipe.execute()
             mutex.release()
-
 
     def process_item(self, item, spider):
         if len(self.items) >= self.cachesize:
